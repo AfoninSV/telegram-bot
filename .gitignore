@@ -1,0 +1,24 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+*.venv
+.env
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Databases
+*.sqlite
+
+# Logs
+logs/
+*.log
+
+# Binary files
+*.bin
