@@ -25,8 +25,6 @@ In addition to these, we have some additional commands to enhance the user exper
 ## Getting Started
 
 You can interact with our bot by searching for its username in the Telegram app. Once you have started a chat with the bot, you can use any of the above commands to explore a world of recipes.
-place "its username" with the actual username of your bot. Also, make sure to include any additional setup instructions, contact information, or other details as necessary.
-Конечно, вот как вы можете структурировать эту информацию для файла `README.md` на русском языке:
 
 ---
 
