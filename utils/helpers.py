@@ -1,10 +1,26 @@
+import os
 from pathlib import Path
-from dotenv import dotenv_values
+from dataclasses import dataclass
+from dotenv import load_dotenv
+from pydantic import SecretStr, StrictStr, BaseSettings
+
 
 env_path = Path(__file__).parent.parent.joinpath(".env")
+load_dotenv(env_path)
 
-# Load environment values
-config: dict = dotenv_values(env_path)
+
+class SettingsApi(BaseSettings):
+    api_key: SecretStr = os.getenv("API_KEY", None)
+    api_host: StrictStr = os.getenv("API_HOST", None)
+
+
+@dataclass
+class Factors:
+    categories: str = "c"
+    area: str = "a"
+    ingredients: str = "i"
+    search: str = "s"
+
 
 start_message = """
 Welcome to the Telegram Recipe Bot!
@@ -18,7 +34,7 @@ Here are the core commands our bot supports:
 - /high: Get complex recipes with more ingredients. Test your skills with these challenging dishes.
 - /custom: Specify a range of ingredients, and the bot will find recipes within that range.
 - /random: Discover new recipes with a random suggestion.
-- /search: Find recipes that include a specific ingredient.
+- /search: Find recipes that include a specific ingredient or by name.
 - /list: Get a list of all categories, areas, and ingredients.
 - /history: See your last ten queries, including the command type, parameters used, and query time.
 
