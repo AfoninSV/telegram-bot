@@ -1,27 +1,22 @@
-from utils import helpers
+from utils.helpers import SettingsApi
 import requests
 
+api_sets = SettingsApi()
 
 headers = {
-    "X-RapidAPI-Key": helpers.config.get("API_KEY"),
-    "X-RapidAPI-Host": "themealdb.p.rapidapi.com"
-}
-factors = {
-    "categories": "c",
-    "area": "a",
-    "ingredients": "i"
+    "X-RapidAPI-Key": api_sets.api_key.get_secret_value(),
+    "X-RapidAPI-Host": api_sets.api_host
 }
 
 
-def get_list(factor: str) -> list[str]:
-    """Returns list of categories or area accordingly to given factor"""
+def get_list_response(list_factor: str) -> list[dict]:
+    """Returns list of categories/area/ingredients accordingly to given factor"""
 
-    url = "https://themealdb.p.rapidapi.com/list.php"
-    querystring = {factor: "list"}
+    url = f"https://themealdb.p.rapidapi.com/list.php"
+    querystring = {list_factor: "list"}
 
-    # get item names list from json dict
-    response: dict = requests.get(url, headers=headers, params=querystring).json()
-    response: list = [f"{category.get('strCategory').capitalize()}"
-                      for category in response.get("meals")]
-
+    response: dict = requests.get(url, headers=headers, params=querystring).json().get("meals")
+    if not response:
+        # Log returned None from api server
+        ...
     return response

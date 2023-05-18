@@ -18,7 +18,7 @@ In addition to these, we have some additional commands to enhance the user exper
 
 - **`/random`**: Returns a random recipe. This can be a fun way for users to discover new recipes they might not have tried otherwise.
 
-- **`/search`**: Users can input a key ingredient they have on hand, and the bot will return recipes that include that ingredient.
+- **`/search`**: Users can input a key ingredient they have on hand or definite meal to find, and the bot will return recipes that include that ingredient.
 
 - **`/list`**: Returns a list of all Categories, Area, Ingredients
 
@@ -48,7 +48,7 @@ You can interact with our bot by searching for its username in the Telegram app.
 
 - **`/random`**: Возвращает случайный рецепт. Это может быть интересным способом для пользователей открыть для себя новые рецепты, которые они, возможно, еще не пробовали.
 
-- **`/search`**: Пользователи могут ввести ключевой ингредиент, который у них есть, и бот вернет рецепты, которые включают этот ингредиент.
+- **`/search`**: Пользователи могут ввести ключевой ингредиент или конкретное название блюда, и бот вернет рецепты, которые включают этот ингредиент.
 
 - **`/list`**: Возвращает список всех категорий, стран, ингридиентов.
 
