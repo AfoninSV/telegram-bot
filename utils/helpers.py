@@ -15,11 +15,10 @@ class SettingsApi(BaseSettings):
 
 
 @dataclass
-class Factors:
+class ListFactors:
     categories: str = "c"
     area: str = "a"
     ingredients: str = "i"
-    search: str = "s"
 
 
 start_message = """
