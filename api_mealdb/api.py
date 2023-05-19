@@ -40,3 +40,9 @@ def get_meal_by_name(meal_name: str) -> Optional[dict]:
     response: dict[int, dict] = {item[0]: item[1] for item in enumerate(response, start=1)}
 
     return response
+
+
+def get_random_meal() -> dict:
+    return make_response("random")[0]
+
+pprint(get_random_meal())
