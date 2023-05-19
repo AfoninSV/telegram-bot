@@ -1,7 +1,7 @@
 from utils.helpers import SettingsApi
 from typing import Optional, Dict
 import requests
-from pprint import pprint
+
 
 api_sets = SettingsApi()
 
@@ -44,5 +44,3 @@ def get_meal_by_name(meal_name: str) -> Optional[dict]:
 
 def get_random_meal() -> dict:
     return make_response("random")[0]
-
-pprint(get_random_meal())
