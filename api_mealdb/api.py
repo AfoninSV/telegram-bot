@@ -1,9 +1,8 @@
-from utils.helpers import SettingsApi, my_zip
+from utils.helpers import api_sets, my_zip
 from typing import Optional, Dict
 import requests
 from pprint import pprint
 
-api_sets = SettingsApi()
 
 headers = {
     "X-RapidAPI-Key": api_sets.api_key.get_secret_value(),
@@ -80,20 +79,29 @@ def low(category_name):
     with the lowest quantity of ingredients by category
     """
 
+    # Get list of meals id
     meals_list = get_meals_by_category(category_name)
+    if meals_list is None:
+        return
 
+    # Loop through list of meaL id
     for meal in meals_list:
+        # Get ID from meal dict
         meal_id = meal.get("idMeal")
+        # Get ingredients of meal
         ingredients_list = get_meal_ingredients(meal_id)
+        # Get len of ingredients list
         ingredients_qty = len(ingredients_list)
+        # Write quantity to meal dictionary
         meal["ingredients_qty"] = ingredients_qty
 
+    # Sort meals by their ingredients qty
     meals_list.sort(key=lambda meal: meal.get("ingredients_qty"))
     return meals_list[:3]
 
 
 if __name__ == "__main__":
-    pprint(get_meals_by_category("pork"))
-    pprint(get_meal_by_id(52885))
-    pprint(get_meal_ingredients(52885))
+    # pprint(get_meals_by_category("pork"))
+    # pprint(get_meal_by_id(52885))
+    # pprint(get_meal_ingredients(52885))
     pprint(low("pork"))

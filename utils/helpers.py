@@ -12,6 +12,10 @@ load_dotenv(env_path)
 class SettingsApi(BaseSettings):
     api_key: SecretStr = os.getenv("API_KEY", None)
     api_host: StrictStr = os.getenv("API_HOST", None)
+    tg_token: SecretStr = os.getenv("TG_TOKEN")
+
+
+api_sets = SettingsApi()
 
 
 @dataclass
