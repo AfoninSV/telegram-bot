@@ -28,10 +28,13 @@ class ListFactors:
 def my_zip(list_ingr, list_measr) -> list[tuple]:
     """Zips list, avoiding empty strings"""
 
+    # String of ingredients
     result_list = list()
     for item in zip(list_ingr, list_measr):
-        if len(item[0]) == 0:
+        # check for empty cell
+        if item[0] is None or len(item[0]) == 0:
             return result_list
+
         result_list.append(item)
     return result_list
 
