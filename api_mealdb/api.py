@@ -1,7 +1,7 @@
 from utils.helpers import api_sets, my_zip
+from data.core import meal_interface
 from typing import Optional, Dict
 import requests
-from pprint import pprint
 
 
 headers = {
@@ -59,28 +59,35 @@ def get_meal_by_id(meal_id) -> dict:
     """Returns meal's description by id"""
 
     querystring = {"i": str(meal_id)}
-    response: list = make_response("lookup", params=querystring)
-    return response[0]
+    response: dict = make_response("lookup", params=querystring)[0]
+    return response
 
 
-def get_meal_ingredients(meal_id) -> list[tuple]:
+def get_meal_ingredients(meal_id) -> str:
     """Returns meal ingredients by id"""
+
+    if meal := meal_interface.read_by("meal_id", meal_id):
+        return meal.get("ingredients")
 
     meal = get_meal_by_id(meal_id)
     ingredients: list = [meal.get(f"strIngredient{ingredient_num}") for ingredient_num in range(1, 21)]
     measures = [meal.get(f"strMeasure{ingredient_num}") for ingredient_num in range(1, 21)]
 
-    return my_zip(ingredients, measures)
+    ingredient_list: str = "\n".join([f"{ingr} {meas}" for ingr, meas in my_zip(ingredients, measures)])
+    meal_interface.insert(meal_id=meal_id, ingredients=ingredient_list)
+
+    return ingredient_list
 
 
-def low(category_name):
+def meals_by_qty(category_name) -> list:
     """
-    Returns slice of first 3 meals
-    with the lowest quantity of ingredients by category
+    Returns list of meals by ingredients quantity by category.
+    Base function to work with /low, /high commands
     """
 
     # Get list of meals id
-    meals_list = get_meals_by_category(category_name)
+    meals_list: list = get_meals_by_category(category_name)
+    # Check if exists
     if meals_list is None:
         return
 
@@ -91,17 +98,26 @@ def low(category_name):
         # Get ingredients of meal
         ingredients_list = get_meal_ingredients(meal_id)
         # Get len of ingredients list
-        ingredients_qty = len(ingredients_list)
+        ingredients_qty = len(ingredients_list.split("\n"))
         # Write quantity to meal dictionary
         meal["ingredients_qty"] = ingredients_qty
 
     # Sort meals by their ingredients qty
     meals_list.sort(key=lambda meal: meal.get("ingredients_qty"))
-    return meals_list[:3]
+    return meals_list
 
 
-if __name__ == "__main__":
-    # pprint(get_meals_by_category("pork"))
-    # pprint(get_meal_by_id(52885))
-    # pprint(get_meal_ingredients(52885))
-    pprint(low("pork"))
+def low(category_name: str) -> Optional[list]:
+    result = meals_by_qty(category_name)
+
+    # Check for proper, existed reply
+    if result is not None:
+        return result[:3]
+
+
+def high(category_name: str) -> Optional[list]:
+    result = meals_by_qty(category_name)
+
+    # Check for proper, existed reply
+    if result is not None:
+        return result[:-4:-1]
