@@ -7,7 +7,7 @@ db_meal = pw.SqliteDatabase("meal.db")
 
 class BaseModel(pw.Model):
     id_key = pw.AutoField()
-    date_time = pw.DateTimeField(default=datetime.utcnow())
+    date_time = pw.DateTimeField(default=datetime.now().strftime("%d-%m-%y %H:%M:%S"))
 
 
 class History(BaseModel):
@@ -25,9 +25,8 @@ class Meal(BaseModel):
     to cache data and decrease API usage and response time
     """
 
-    meal_id = pw.AutoField()
-    meal_name = pw.TextField()
-    ingredients_qty = pw.IntegerField()
+    meal_id = pw.TextField()
+    ingredients = pw.TextField()
 
     class Meta:
         database = db_meal
