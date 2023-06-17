@@ -1,13 +1,8 @@
-from utils.helpers import api_sets
-from telegram_bot.handlers import start_handler, lh_conversation
-from telegram.ext import ApplicationBuilder
+from config_data.config import api_settings
+import telebot
 
 # Initialisation bot app
-application = ApplicationBuilder().token(api_sets.tg_token.get_secret_value()).build()
-
-# Add handlers to app
-application.add_handler(start_handler)
-application.add_handler(lh_conversation)
+bot = telebot.TeleBot(api_settings.tg_token.get_secret_value())
 
 # Run the app
-application.run_polling()
+bot.infinity_polling()
