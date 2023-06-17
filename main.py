@@ -1,8 +1,5 @@
-from config_data.config import api_settings
-import telebot
+from loader import bot
 
-# Initialisation bot app
-bot = telebot.TeleBot(api_settings.tg_token.get_secret_value())
-
-# Run the app
-bot.infinity_polling()
+if __name__ == "__main__":
+    # Run the app
+    bot.infinity_polling()
