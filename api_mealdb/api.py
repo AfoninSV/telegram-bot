@@ -1,12 +1,13 @@
-from utils.helpers import api_sets, my_zip
-from data.core import meal_interface
+from config_data.config import api_settings
+from utils.helpers import my_zip
+from database.core import meal_interface
 from typing import Optional, Dict
 import requests
 
 
 headers = {
-    "X-RapidAPI-Key": api_sets.api_key.get_secret_value(),
-    "X-RapidAPI-Host": api_sets.api_host
+    "X-RapidAPI-Key": api_settings.api_key.get_secret_value(),
+    "X-RapidAPI-Host": api_settings.api_host
 }
 
 
