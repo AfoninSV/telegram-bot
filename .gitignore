@@ -15,6 +15,7 @@ venv/
 
 # Databases
 *.sqlite
+*.db
 
 # Logs
 logs/
