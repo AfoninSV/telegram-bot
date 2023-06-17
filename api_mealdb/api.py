@@ -6,8 +6,8 @@ import requests
 
 
 headers = {
-    "X-RapidAPI-Key": api_settings.api_key.get_secret_value(),
-    "X-RapidAPI-Host": api_settings.api_host
+    "X-RapidAPI-Key": api_settings.meal_api_key.get_secret_value(),
+    "X-RapidAPI-Host": api_settings.meal_api_host
 }
 
 
