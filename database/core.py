@@ -1,4 +1,4 @@
-from .models import db_history, db_meal, History, Meal
+from .models import db_history, db_meal, db_states, History, Meal, States
 from typing import Type, Union, Optional, Dict, Any
 from peewee import DoesNotExist
 
@@ -7,6 +7,9 @@ db_history.create_tables([History])
 
 db_meal.connect()
 db_meal.create_tables([Meal])
+
+db_states.connect()
+db_states.create_tables([States])
 
 
 def is_exist(func_to_validate):
@@ -59,3 +62,4 @@ class DBInterface:
 
 history_interface = DBInterface(db_history, History)
 meal_interface = DBInterface(db_meal, Meal)
+states_interface = DBInterface(db_states, States)

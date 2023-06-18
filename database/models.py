@@ -3,6 +3,7 @@ import peewee as pw
 
 db_history = pw.SqliteDatabase("history.db")
 db_meal = pw.SqliteDatabase("meal.db")
+db_states = pw.SqliteDatabase("states.db")
 
 
 class BaseModel(pw.Model):
@@ -30,3 +31,15 @@ class Meal(BaseModel):
 
     class Meta:
         database = db_meal
+
+
+class States(BaseModel):
+    """
+    Stores states of users
+    """
+
+    user_id = pw.IntegerField()
+    state = pw.IntegerField()
+
+    class Meta:
+        database = db_states
