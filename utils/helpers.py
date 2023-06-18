@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from database.core import history_interface, History
 
 
 @dataclass
@@ -20,6 +21,16 @@ def my_zip(list_ingr, list_measr) -> list[tuple]:
 
         result_list.append(item)
     return result_list
+
+
+def get_last_n_from_history(n: int, user_id: str):
+    db = history_interface
+    values = db.read_all()
+    sorted_values = [row.message for row in values if row.user_id == user_id]
+
+    if len(sorted_values) >= n:
+        return sorted_values[-n]
+    return sorted_values[-len(sorted_values)]
 
 
 start_message = """
