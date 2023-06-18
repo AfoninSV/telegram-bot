@@ -14,6 +14,7 @@ class BaseModel(pw.Model):
 class History(BaseModel):
     """Stores user commands call history"""
 
+    user_id = pw.IntegerField()
     message = pw.TextField()
 
     class Meta:
