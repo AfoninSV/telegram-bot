@@ -1,62 +1,99 @@
-#from api_mealdb import api
-#from database.core import history_interface
+from api_mealdb import api
+from loader import bot
+from utils.helpers import ListFactors, get_last_n_from_history
+from database.core import history_interface, states_interface
+from telebot.types import Message, ReplyKeyboardMarkup
+
+"""
+states:
+    0: cancel,
+    1: ask_category,
+    2: low_reply,
+    3: high_reply,
+    4: button
+"""
 
 
+def get_user_state(msg: Message):
+    result = states_interface.read_by("user_id", msg.from_user.id)
+    if result:
+        return result.get('state')
+    return None
 
 
+def set_user_state(msg: Message, state: int) -> None:
+    if get_user_state(msg) is None:
+        states_interface.insert(user_id=msg.from_user.id, state=state)
+    else:
+        states_interface.update('state', state, user_id=msg.from_user.id)
 
-# def ask_category() -> int:
-#     """Send message asking to input desired category"""
-#
-#     update.message.reply_text('Please enter the category name:')
-#     # core.db_insert(update.message.text) WIP
-#     if update.message.text == "/low":
-#         return 1
-#     elif update.message.text == "/high":
-#         return 2
-#     return 0
-#
-#
-# def category_not_found() -> None:
-#     """Sends message informing that looked database wasn't found and
-#     sends existed fields"""
-#     update.message.reply_text('Category not found, please see categories below and try again:')
-#     categories_str = ", ".join(api.get_list_by_key(ListFactors.categories))
-#     update.message.reply_text(categories_str)
-#
-#
-# def category_meals_found(result: list) -> None:
-#     """Sends a list of meals within provided list and asks the user to choose a meal"""
-#
-#     keyboard = list()
-#     for i_meal, meal in enumerate(result, start=1):
-#         update.message.reply_photo(f"{meal.get('strMealThumb')}\n",
-#                                          caption=f"{i_meal}: {meal['strMeal']}"
-#                                                  f"\n    {meal['ingredients_qty']} ingredients\n")
-#         keyboard.append(InlineKeyboardButton(str(i_meal), callback_data=meal.get("idMeal")))
-#
-#     reply_markup = InlineKeyboardMarkup([keyboard])
-#     update.message.reply_text("Please choose meal to get recipe:", reply_markup=reply_markup)
-#
-#
-# def low_reply() -> int:
-#     """Processes the user input for a category and searches based on the category name.
-#     Used fod /low command."""
-#
-#     history_interface.insert(message=update.message.text)
-#     update.message.reply_text('Searching...')
-#     category_name = update.message.text
-#     result = api.low(category_name)
-#
-#     if result is None:
-#         category_not_found()
-#         return 1
-#
-#     category_meals_found(, result)
-#     return 3
-#
-#
-# def high_reply() -> int:
+
+def get_last_user_msg(message):
+    history_interface.read_by('user_id', message.from_user.id)
+
+
+def ask_category(message) -> int:
+    """Send message asking to input desired category"""
+
+    last_cmd = get_last_n_from_history(1, message.from_user.id)
+    bot.send_message(message.chat.id, 'Please enter the category name:')
+
+    if last_cmd == '/low':
+        history_interface.insert(user_id=message.from_user.id, message='/low')
+        set_user_state(message, 2)
+        return 2
+    elif last_cmd == '/high':
+        history_interface.insert(user_id=message.from_user.id, message='/high')
+        set_user_state(message, 3)
+        return 3
+
+
+def category_not_found(message: Message) -> None:
+    """Sends message informing that looked database wasn't found and
+    sends existed fields"""
+
+    categories_str = ", ".join(api.get_list_by_key(ListFactors.categories))
+    bot.send_message(message.chat.id, f'Category not found, please see categories below: '
+                                      f'\n\n{categories_str}')
+    bot.send_message(message.chat.id, "Try again: ")
+    #set_user_state(message, 1)
+
+
+def category_meals_found(message: Message, result: list) -> int:
+    """Sends a list of meals within provided list and asks the user to choose a meal"""
+
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    for i_meal, meal in enumerate(result, start=1):
+        bot.send_photo(message.chat.id,
+                       f"{meal.get('strMealThumb')}\n",
+                       caption=f"{i_meal}: {meal['strMeal']}" \
+                               f"\n    {meal['ingredients_qty']} ingredients\n")
+        keyboard.add(str(i_meal))
+
+    bot.send_message(message.chat.id, "Please choose meal to get recipe:", reply_markup=keyboard)
+    set_user_state(message, 0)
+    # bot.register_next_step_handler_by_chat_id(message.chat.id, states.states[0])
+
+
+def low_reply(message: Message) -> None:
+    """Processes the user input for a category and searches based on the category name.
+    Used fod /low command."""
+
+    bot.send_message(message.chat.id, 'Searching...')
+    category_name = message.text
+    result = api.low(category_name)
+
+    if result is None:
+        category_not_found(message)
+        # bot.register_next_step_handler_by_chat_id(message.chat.id, states.states[2])
+    else:
+        category_meals_found(message, result)
+        set_user_state(message, 4)
+        # bot.register_next_step_handler_by_chat_id(message.chat.id, states.states[4])
+
+
+def high_reply(message: Message) -> int:
+    ...
 #     """Processes the user input for a category and searches based on the category name.
 #     Used fod /high command."""
 #
@@ -71,11 +108,11 @@
 #
 #     category_meals_found(, result)
 #     return 3
-#
-#
-# def cancel() -> None:
-#     """Send notification that operation was canceled"""
-#     update.message.reply_text('Operation cancelled.')
+
+
+def cancel(message: Message) -> None:
+    """Send notification that operation was canceled"""
+    bot.send_message(message.chat.id, 'Operation cancelled.')
 #
 #
 # def reply_recipe(meal_id) -> tuple:
@@ -95,9 +132,10 @@
 #                  f"{link}"
 #
 #     return meal.get("strMealThumb"), reply_str
-#
-#
-# def button(update: : ContextTypes.DEFAULT_TYPE) -> int:
+
+
+def button(message: Message) -> int:
+    bot.set_state(message.from_user.id, 0, message.chat.id)
 #     """Handles the button callback query, retrieves the chosen recipe, and sends the recipe details"""
 #     query = update.callback_query
 #     query.answer()
