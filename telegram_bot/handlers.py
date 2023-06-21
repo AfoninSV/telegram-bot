@@ -16,13 +16,7 @@ def low_high_start(message: Message):
     commands.set_user_state(message, 2)
 
 
-# @bot.message_handler(func=lambda message: commands.get_user_state(message) == 1)
-# def re_ask_category(message: Message):
-#     commands.ask_category(message)
-
-
 @bot.message_handler(func=lambda message: commands.get_user_state(message) == 2)
-#@bot.message_handler(func=lambda message: message.text == '2')
 def low_command_reply(message: Message):
     commands.low_reply(message)
 

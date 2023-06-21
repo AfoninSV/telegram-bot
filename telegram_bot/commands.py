@@ -2,7 +2,9 @@ from api_mealdb import api
 from loader import bot
 from utils.helpers import ListFactors, get_last_n_from_history
 from database.core import history_interface, states_interface
-from telebot.types import Message, ReplyKeyboardMarkup
+from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from telebot.callback_data import CallbackData, CallbackDataFilter
+from telebot.custom_filters import AdvancedCustomFilter
 
 """
 states:
@@ -13,6 +15,7 @@ states:
     4: button
 """
 
+products_factory = CallbackData('meal_id', prefix='meals')
 
 def get_user_state(msg: Message):
     result = states_interface.read_by("user_id", msg.from_user.id)
@@ -56,19 +59,20 @@ def category_not_found(message: Message) -> None:
     bot.send_message(message.chat.id, f'Category not found, please see categories below: '
                                       f'\n\n{categories_str}')
     bot.send_message(message.chat.id, "Try again: ")
-    #set_user_state(message, 1)
 
 
 def category_meals_found(message: Message, result: list) -> int:
     """Sends a list of meals within provided list and asks the user to choose a meal"""
 
-    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    keyboard = InlineKeyboardMarkup()
     for i_meal, meal in enumerate(result, start=1):
         bot.send_photo(message.chat.id,
                        f"{meal.get('strMealThumb')}\n",
                        caption=f"{i_meal}: {meal['strMeal']}" \
                                f"\n    {meal['ingredients_qty']} ingredients\n")
-        keyboard.add(str(i_meal))
+        button = InlineKeyboardButton(text=i_meal,
+                                      callback_data=products_factory.new(meal_id=meal.get('idMeal')))
+        keyboard.add(button)
 
     bot.send_message(message.chat.id, "Please choose meal to get recipe:", reply_markup=keyboard)
     set_user_state(message, 0)
@@ -113,37 +117,37 @@ def high_reply(message: Message) -> int:
 def cancel(message: Message) -> None:
     """Send notification that operation was canceled"""
     bot.send_message(message.chat.id, 'Operation cancelled.')
-#
-#
-# def reply_recipe(meal_id) -> tuple:
-#     """Retrieves the recipe for a given meal ID and returns the recipe picture and text"""
-#
-#     meal = api.get_meal_by_id(meal_id)
-#     reply_str = str()
-#
-#     ingredients_str = api.get_meal_ingredients(meal_id).strip()
-#     link = meal.get('strYoutube')
-#
-#     reply_str += f"Name: {meal.get('strMeal')}\n" \
-#                  f"Category: {meal.get('strCategory')}\n" \
-#                  f"Area: {meal.get('strArea')}\n" \
-#                  f"Ingredients: {ingredients_str}" \
-#                  f"\n\nInstruction:\n {meal.get('strInstructions')}\n" \
-#                  f"{link}"
-#
-#     return meal.get("strMealThumb"), reply_str
 
 
-def button(message: Message) -> int:
-    bot.set_state(message.from_user.id, 0, message.chat.id)
-#     """Handles the button callback query, retrieves the chosen recipe, and sends the recipe details"""
-#     query = update.callback_query
-#     query.answer()
-#
-#     chosen_id = query.data
-#
-#     recipe_picture, recipe_text = reply_recipe(chosen_id)
-#     query.message.reply_photo(recipe_picture)
-#     query .message.reply_text(recipe_text)
-#
-#     return ConversationHandler.END
+def reply_recipe(meal_id) -> tuple:
+    """Retrieves the recipe for a given meal ID and returns the recipe picture and text"""
+
+    meal = api.get_meal_by_id(meal_id)
+    reply_str = str()
+
+    ingredients_str = api.get_meal_ingredients(meal_id).strip()
+    link = meal.get('strYoutube')
+
+    reply_str += f"Name: {meal.get('strMeal')}\n" \
+                 f"Category: {meal.get('strCategory')}\n" \
+                 f"Area: {meal.get('strArea')}\n" \
+                 f"Ingredients: {ingredients_str}" \
+                 f"\n\nInstruction:\n {meal.get('strInstructions')}\n" \
+                 f"{link}"
+
+    return meal.get("strMealThumb"), reply_str
+
+
+@bot.callback_query_handler(lambda call: True)
+def button(call) -> int:
+    """Handles the button callback query, retrieves the chosen recipe, and sends the recipe details"""
+
+    callback_data: dict =   products_factory.parse(call.data)
+
+    chosen_id = callback_data.get('meal_id')
+    print(callback_data, type(callback_data))
+    print(chosen_id)
+
+    recipe_picture, recipe_text = reply_recipe(chosen_id)
+    bot.send_photo(call.message.chat.id, recipe_picture)
+    bot.send_message(call.message.chat.id, recipe_text)
