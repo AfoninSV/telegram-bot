@@ -79,7 +79,7 @@ def category_meals_found(message: Message, result: list) -> int:
 
 
 def low_high_reply(message: Message,
-                   func: api.low | api.high = api.low) -> None:
+                   func=api.low) -> None:
     """Base function for low_reply, high_reply.
     Processes the user input for a category and searches based on the category name.
     Used for /low and /high commands."""
@@ -106,7 +106,7 @@ def cancel(message: Message) -> None:
     bot.send_message(message.chat.id, 'Operation cancelled.')
 
 
-def reply_recipe(meal_id: Optional[str]=None, meal:Optional[dict]=None) -> tuple[str]:
+def get_recipe(meal_id: Optional[str]=None, meal:Optional[dict]=None) -> tuple[str]:
     """Retrieves the recipe for a given meal ID and returns the recipe picture and text"""
 
     if meal_id:
@@ -132,7 +132,7 @@ def button(call) -> None:
     callback_data: dict = products_factory.parse(call.data)
     chosen_id = callback_data.get('meal_id')
 
-    recipe_picture, recipe_text = reply_recipe(meal_id=chosen_id)
+    recipe_picture, recipe_text = get_recipe(meal_id=chosen_id)
     bot.send_photo(call.message.chat.id, recipe_picture)
     bot.send_message(call.message.chat.id, recipe_text)
     set_user_state(call.message, 0)
