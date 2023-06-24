@@ -8,7 +8,7 @@ from telebot.custom_filters import AdvancedCustomFilter
 
 """
 states:
-    0: cancel,
+    0: cancel (waiting),
     1: ask_category,
     2: low_reply,
     3: high_reply,
@@ -38,15 +38,13 @@ def get_last_user_msg(message):
 def ask_category(message) -> int:
     """Send message asking to input desired category"""
 
-    last_cmd = get_last_n_from_history(1, message.from_user.id)
+    last_command = get_last_n_from_history(1, message.from_user.id)
     bot.send_message(message.chat.id, 'Please enter the category name:')
 
-    if last_cmd == '/low':
-        history_interface.insert(user_id=message.from_user.id, message='/low')
+    if last_command == '/low':
         set_user_state(message, 2)
         return 2
-    elif last_cmd == '/high':
-        history_interface.insert(user_id=message.from_user.id, message='/high')
+    elif last_command == '/high':
         set_user_state(message, 3)
         return 3
 
@@ -59,6 +57,7 @@ def category_not_found(message: Message) -> None:
     bot.send_message(message.chat.id, f'Category not found, please see categories below: '
                                       f'\n\n{categories_str}')
     bot.send_message(message.chat.id, "Try again: ")
+    return get_user_state(message)
 
 
 def category_meals_found(message: Message, result: list) -> int:
@@ -76,42 +75,29 @@ def category_meals_found(message: Message, result: list) -> int:
 
     bot.send_message(message.chat.id, "Please choose meal to get recipe:", reply_markup=keyboard)
     set_user_state(message, 0)
-    # bot.register_next_step_handler_by_chat_id(message.chat.id, states.states[0])
 
 
-def low_reply(message: Message) -> None:
-    """Processes the user input for a category and searches based on the category name.
-    Used fod /low command."""
+def low_high_reply(message: Message,
+                   func: api.low | api.high = api.low) -> None:
+    """Base function for low_reply, high_reply.
+    Processes the user input for a category and searches based on the category name.
+    Used for /low and /high commands."""
 
     bot.send_message(message.chat.id, 'Searching...')
     category_name = message.text
-    result = api.low(category_name)
+    result = func(category_name)
 
     if result is None:
         category_not_found(message)
-        # bot.register_next_step_handler_by_chat_id(message.chat.id, states.states[2])
     else:
         category_meals_found(message, result)
         set_user_state(message, 4)
-        # bot.register_next_step_handler_by_chat_id(message.chat.id, states.states[4])
 
+def low_reply(message: Message):
+    low_high_reply(message)
 
-def high_reply(message: Message) -> int:
-    ...
-#     """Processes the user input for a category and searches based on the category name.
-#     Used fod /high command."""
-#
-#     history_interface.insert(message=update.message.text)
-#     update.message.reply_text('Searching...')
-#     category_name = update.message.text
-#     result = api.high(category_name)
-#
-#     if result is None:
-#         category_not_found()
-#         return 2
-#
-#     category_meals_found(, result)
-#     return 3
+def high_reply(message: Message):
+    low_high_reply(message, func=api.high)
 
 
 def cancel(message: Message) -> None:
@@ -138,16 +124,13 @@ def reply_recipe(meal_id) -> tuple:
     return meal.get("strMealThumb"), reply_str
 
 
-@bot.callback_query_handler(lambda call: True)
-def button(call) -> int:
+def button(call) -> None:
     """Handles the button callback query, retrieves the chosen recipe, and sends the recipe details"""
 
-    callback_data: dict =   products_factory.parse(call.data)
-
+    callback_data: dict = products_factory.parse(call.data)
     chosen_id = callback_data.get('meal_id')
-    print(callback_data, type(callback_data))
-    print(chosen_id)
 
     recipe_picture, recipe_text = reply_recipe(chosen_id)
     bot.send_photo(call.message.chat.id, recipe_picture)
     bot.send_message(call.message.chat.id, recipe_text)
+    set_user_state(call.message, 0)
