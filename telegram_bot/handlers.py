@@ -13,7 +13,14 @@ def cancel(message: Message) -> None:
 
 @bot.message_handler(commands=['state'])
 def cancel(message: Message) -> None:
+    # Used for debug
     bot.send_message(message.chat.id, commands.get_user_state(message))
+
+
+@bot.message_handler(commands=['id'])
+def cancel(message: Message) -> None:
+    # Used for debug
+    bot.send_message(message.chat.id, f'User: {message.from_user.id}\nChat: {message.chat.id}')
 
 
 @bot.message_handler(commands=['start', 'help'])
