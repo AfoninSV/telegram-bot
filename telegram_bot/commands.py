@@ -13,7 +13,8 @@ states:
     1: ask_category,
     2: low_reply,
     3: high_reply,
-    4: button
+    4: button_reply
+    5: wait for random
 """
 
 products_factory = CallbackData('meal_id', prefix='meals')
@@ -106,36 +107,44 @@ def cancel(message: Message) -> None:
     bot.send_message(message.chat.id, 'Operation cancelled.')
 
 
-def get_recipe(meal_id: Optional[str]=None, meal:Optional[dict]=None) -> tuple[str]:
+def get_recipe_str(meal_id: Optional[str]=None, meal:Optional[dict]=None) -> tuple[str]:
     """Retrieves the recipe for a given meal ID and returns the recipe picture and text"""
 
     if meal_id:
         meal = api.get_meal_by_id(meal_id)
-        reply_str = str()
 
         ingredients_str = api.get_meal_ingredients(meal_id).strip()
         link = meal.get('strYoutube')
+    else:
+        ingredients_str = api.get_meal_ingredients(meal.get('idMeal')).strip()
+        link = meal.get('strYoutube')
 
+    reply_str = str()
     reply_str += f"Name: {meal.get('strMeal')}\n" \
                  f"Category: {meal.get('strCategory')}\n" \
                  f"Area: {meal.get('strArea')}\n" \
                  f"Ingredients: {ingredients_str}" \
                  f"\n\nInstruction:\n {meal.get('strInstructions')}\n" \
                  f"{link}"
-
     return meal.get("strMealThumb"), reply_str
 
 
-def button(call) -> None:
+def send_recipe_str(recipe_picture: str, recipe_str: str, message: Message) -> None:
+    bot.send_photo(message.chat.id, recipe_picture)
+    bot.send_message(message.chat.id, recipe_str)
+
+
+def lh_button_get(call) -> None:
     """Handles the button callback query, retrieves the chosen recipe, and sends the recipe details"""
 
     callback_data: dict = products_factory.parse(call.data)
     chosen_id = callback_data.get('meal_id')
 
-    recipe_picture, recipe_text = get_recipe(meal_id=chosen_id)
-    bot.send_photo(call.message.chat.id, recipe_picture)
-    bot.send_message(call.message.chat.id, recipe_text)
+    send_recipe_str(*get_recipe_str(meal_id=chosen_id), call.message)
     set_user_state(call.message, 0)
 
-def random_recipe(message: Message):
-    random_id = api.get_random_meal().get('idMeal')
+
+def random_recipe(message: Message) -> None:
+    random_recipe: dict = api.get_random_meal()
+    send_recipe_str(*get_recipe_str(meal=random_recipe), message)
+    set_user_state(message, 0)

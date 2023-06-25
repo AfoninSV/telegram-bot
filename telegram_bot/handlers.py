@@ -54,4 +54,10 @@ def high_command_reply(message: Message) -> None:
 @bot.callback_query_handler(lambda call: True)
 def button_for_recipe(call) -> None:
     """Handles the button callback query, retrieves the chosen recipe, and sends the recipe details"""
-    commands.button(call)
+    commands.lh_button_get(call)
+
+
+@bot.message_handler(commands=['random'])
+def low_high_start(message: Message) -> None:
+    commands.set_user_state(message, 5)
+    commands.random_recipe(message)
