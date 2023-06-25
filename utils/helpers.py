@@ -23,10 +23,23 @@ def my_zip(list_ingr, list_measr) -> list[tuple]:
     return result_list
 
 
+def history_clean(user_id):
+    """Deletes rows of History table if there are more than 20 for asked user id"""
+
+    query = History.select().where(History.user_id == user_id).order_by(History.id_key.desc())
+    last_n_records = list(query)
+
+    if len(last_n_records) > 20:
+        records_to_delete = last_n_records[:-20]  # Exclude the last 20 records
+        delete_query = History.delete().where(History.id_key.in_(records_to_delete))
+        delete_query.execute()
+
+
 def get_last_n_from_history(n: int, user_id: str):
     db = history_interface
     values = db.read_all()
     sorted_values = [row.message for row in values if row.user_id == user_id]
+    history_clean(user_id)
 
     if len(sorted_values) >= n:
         return sorted_values[-n]
@@ -51,4 +64,3 @@ Here are the core commands our bot supports:
 
 Happy cooking!
 """
-
