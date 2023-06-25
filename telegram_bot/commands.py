@@ -147,7 +147,9 @@ def random_recipe(message: Message) -> None:
     send_recipe_str(*get_recipe_str(meal=random_recipe), message)
     set_user_state(message, 0)
 
-def ask_for_list(message: Message):
+
+def ask_for_list(message: Message) -> None:
+    """Sends message asking for type of list and make buttons for reply"""
 
     keyboard = InlineKeyboardMarkup()
     for type in [type for type in dir(ListFactors) if not type.startswith('__')]:
