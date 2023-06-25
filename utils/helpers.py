@@ -5,7 +5,7 @@ from database.core import history_interface, History
 @dataclass
 class ListFactors:
     categories: str = "c"
-    area: str = "a"
+    areas: str = "a"
     ingredients: str = "i"
 
 

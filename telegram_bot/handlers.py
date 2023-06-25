@@ -48,6 +48,18 @@ def low_high_start(message: Message) -> None:
     commands.ask_category(message)
 
 
+@bot.message_handler(commands=['random'])
+def low_high_start(message: Message) -> None:
+    commands.set_user_state(message, 5)
+    commands.random_recipe(message)
+
+
+@bot.message_handler(commands=['list'])
+def low_high_start(message: Message) -> None:
+    commands.set_user_state(message, 6)
+    commands.ask_for_list(message)
+
+
 @bot.message_handler(func=lambda message: commands.get_user_state(message) == 2)
 def low_command_reply(message: Message) -> None:
     commands.low_reply(message)
@@ -59,12 +71,10 @@ def high_command_reply(message: Message) -> None:
 
 
 @bot.callback_query_handler(lambda call: True)
-def button_for_recipe(call) -> None:
+def button(call) -> None:
     """Handles the button callback query, retrieves the chosen recipe, and sends the recipe details"""
-    commands.lh_button_get(call)
-
-
-@bot.message_handler(commands=['random'])
-def low_high_start(message: Message) -> None:
-    commands.set_user_state(message, 5)
-    commands.random_recipe(message)
+    print(call.data, type(call.data), call.data.isdigit())
+    if call.data.isdigit():
+        commands.lh_button_get(call)
+    elif call.data in {'areas', 'categories', 'ingredients'}:
+        bot.send_message(call.message.chat.id, call.data)

@@ -4,7 +4,6 @@ from utils.helpers import ListFactors, get_last_n_from_history
 from database.core import history_interface, states_interface
 from typing import Optional
 from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-from telebot.callback_data import CallbackData, CallbackDataFilter
 from telebot.custom_filters import AdvancedCustomFilter
 
 """
@@ -15,9 +14,9 @@ states:
     3: high_reply,
     4: button_reply
     5: wait for random
+    6: ask for list type
 """
 
-products_factory = CallbackData('meal_id', prefix='meals')
 
 def get_user_state(msg: Message):
     result = states_interface.read_by("user_id", msg.from_user.id)
@@ -72,7 +71,7 @@ def category_meals_found(message: Message, result: list) -> int:
                        caption=f"{i_meal}: {meal['strMeal']}" \
                                f"\n    {meal['ingredients_qty']} ingredients\n")
         button = InlineKeyboardButton(text=i_meal,
-                                      callback_data=products_factory.new(meal_id=meal.get('idMeal')))
+                                      callback_data=meal.get('idMeal'))
         keyboard.add(button)
 
     bot.send_message(message.chat.id, "Please choose meal to get recipe:", reply_markup=keyboard)
@@ -137,8 +136,7 @@ def send_recipe_str(recipe_picture: str, recipe_str: str, message: Message) -> N
 def lh_button_get(call) -> None:
     """Handles the button callback query, retrieves the chosen recipe, and sends the recipe details"""
 
-    callback_data: dict = products_factory.parse(call.data)
-    chosen_id = callback_data.get('meal_id')
+    chosen_id = call.data
 
     send_recipe_str(*get_recipe_str(meal_id=chosen_id), call.message)
     set_user_state(call.message, 0)
@@ -148,3 +146,16 @@ def random_recipe(message: Message) -> None:
     random_recipe: dict = api.get_random_meal()
     send_recipe_str(*get_recipe_str(meal=random_recipe), message)
     set_user_state(message, 0)
+
+def ask_for_list(message: Message):
+
+    keyboard = InlineKeyboardMarkup()
+    for type in [type for type in dir(ListFactors) if not type.startswith('__')]:
+        print(type)
+        button = InlineKeyboardButton(text=type,
+                                      callback_data=type)
+        keyboard.add(button)
+
+    bot.send_message(message.chat.id, 'Please choose the type of desired list:', reply_markup=keyboard)
+    set_user_state(message, 0)
+
