@@ -12,7 +12,7 @@ Here are the core commands that our bot supports:
 
 - **`/custom`**: Users can specify a range for the number of ingredients, and the bot would return recipes that fall within that range.
 
-- **`/history`**: Retrieves the last ten queries a user made. It shows the type of command, the parameters they used, and the time of the query.
+- **`/history`**: Retrieves the last ten queries a user made.
 
 In addition to these, we have some additional commands to enhance the user experience:
 
@@ -42,7 +42,7 @@ You can interact with our bot by searching for its username in the Telegram app.
 
 - **`/custom`**: Пользователи могут указать диапазон для количества ингредиентов, и бот вернет рецепты, которые попадают в этот диапазон.
 
-- **`/history`**: Возвращает последние десять запросов, сделанных пользователем. Он показывает тип команды, использованные параметры и время запроса.
+- **`/history`**: Возвращает последние десять запросов, сделанных пользователем.
 
 Кроме того, у нас есть несколько дополнительных команд для улучшения пользовательского опыта:
 

@@ -60,7 +60,7 @@ Here are the core commands our bot supports:
 - /random: Discover new recipes with a random suggestion.
 - /search: Find recipes that include a specific ingredient or by name.
 - /list: Get a list of all categories, areas, and ingredients.
-- /history: See your last ten queries, including the command type, parameters used, and query time.
+- /history: See your last ten queries.
 
 Happy cooking!
 """
