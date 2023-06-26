@@ -153,7 +153,6 @@ def ask_for_list(message: Message) -> None:
 
     keyboard = InlineKeyboardMarkup()
     for type in [type for type in dir(ListFactors) if not type.startswith('__')]:
-        print(type)
         button = InlineKeyboardButton(text=type,
                                       callback_data=type)
         keyboard.add(button)
@@ -161,3 +160,16 @@ def ask_for_list(message: Message) -> None:
     bot.send_message(message.chat.id, 'Please choose the type of desired list:', reply_markup=keyboard)
     set_user_state(message, 0)
 
+def list_reply(message: Message, factor: str) -> None:
+    names_list = api.get_list_by_key(factor)
+    names_str = ", ".join(names_list)
+    if len(names_str) > 4096:
+        list_len = len(names_list)
+        names_str_1 = ", ".join(names_list[:list_len // 2])
+        names_str_2 = ", ".join(names_list[list_len // 2 + 1 :])
+
+        bot.send_message(message.chat.id, names_str_1)
+        bot.send_message(message.chat.id, names_str_2)
+    else:
+        bot.send_message(message.chat.id, names_str)
+    set_user_state(message, 0)

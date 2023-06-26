@@ -73,8 +73,9 @@ def high_command_reply(message: Message) -> None:
 @bot.callback_query_handler(lambda call: True)
 def button(call) -> None:
     """Handles the button callback query, retrieves the chosen recipe, and sends the recipe details"""
-    print(call.data, type(call.data), call.data.isdigit())
+
     if call.data.isdigit():
         commands.lh_button_get(call)
     elif call.data in {'areas', 'categories', 'ingredients'}:
-        bot.send_message(call.message.chat.id, call.data)
+        commands.set_user_state(call.message, 6)
+        commands.list_reply(call.message, commands.ListFactors.__dict__.get(call.data))
