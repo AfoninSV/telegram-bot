@@ -25,7 +25,10 @@ def get_list_by_key(list_factor: str) -> list:
     response: list = make_response("list", params=querystring)
 
     # Open list[dict] to list[dict_value]
-    items_names = [list(item.values())[0] for item in response]
+    if list_factor == 'i':
+        items_names = [item.get('strIngredient') for item in response]
+    else:
+        items_names = [list(item.values())[0] for item in response]
     return items_names
 
 
