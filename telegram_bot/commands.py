@@ -4,19 +4,10 @@ from utils.helpers import ListFactors, get_last_n_from_history
 from database.core import history_interface, states_interface
 from typing import Optional
 from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-from telebot.custom_filters import AdvancedCustomFilter
+from telebot.storage import StateMemoryStorage
 
-"""
-states:
-    0: cancel (waiting),
-    1: ask_category,
-    2: low_reply,
-    3: high_reply,
-    4: button_reply
-    5: wait for random
-    6: ask for list type
-"""
 
+storage = StateMemoryStorage()
 
 def get_user_state(msg: Message):
     result = states_interface.read_by("user_id", msg.from_user.id)
