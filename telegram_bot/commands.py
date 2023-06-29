@@ -1,6 +1,7 @@
 from api_mealdb import api
 from loader import bot
 from utils.helpers import ListFactors, get_last_n_from_history
+from .states import ConversationStates
 from database.core import history_interface, states_interface
 from typing import Optional
 from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
@@ -16,11 +17,8 @@ def get_user_state(msg: Message):
     return None
 
 
-def set_user_state(msg: Message, state: int) -> None:
-    if get_user_state(msg) is None:
-        states_interface.insert(user_id=msg.from_user.id, state=state)
-    else:
-        states_interface.update('state', state, user_id=msg.from_user.id)
+def set_user_state(msg: Message, state: ConversationStates) -> None:
+    bot.set_state(message.from_user.id, state, message.chat.id)
 
 
 def get_last_user_msg(message):
