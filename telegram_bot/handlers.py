@@ -1,5 +1,5 @@
 from . import commands
-from utils.helpers import start_message
+from utils.helpers import start_message, get_last_n_from_history
 from database.core import history_interface
 from loader import bot
 from telebot.types import Message
@@ -58,6 +58,13 @@ def low_high_start(message: Message) -> None:
 def low_high_start(message: Message) -> None:
     commands.set_user_state(message, 6)
     commands.ask_for_list(message)
+
+
+@bot.message_handler(commands=['history'])
+def low_high_start(message: Message) -> None:
+    history_reply = get_last_n_from_history(10, str(message.from_user.id))
+    reply_str = '\n'.join(history_reply)
+    bot.send_message(message.chat.id, reply_str)
 
 
 @bot.message_handler(func=lambda message: commands.get_user_state(message) == 2)
