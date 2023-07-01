@@ -1,6 +1,9 @@
-from .models import db_history, db_meal, db_states, History, Meal, States
 from typing import Type, Union, Optional, Dict, Any
+
 from peewee import DoesNotExist
+
+from .models import db_history, db_meal, db_states, History, Meal, States
+
 
 db_history.connect()
 db_history.create_tables([History])

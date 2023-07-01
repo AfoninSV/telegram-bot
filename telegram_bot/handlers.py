@@ -1,9 +1,10 @@
+from telebot.types import Message
+
 from . import commands
 from .states import ConversationStates, get_user_state
 from utils.helpers import start_message, get_last_n_from_history
 from database.core import history_interface
 from loader import bot
-from telebot.types import Message
 
 
 @bot.message_handler(commands=['cancel'])

@@ -1,7 +1,9 @@
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv, find_dotenv
 from pydantic import SecretStr, StrictStr, BaseSettings
+
 
 if not find_dotenv():
     exit("No '.env' file found.")

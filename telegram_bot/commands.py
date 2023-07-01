@@ -1,11 +1,12 @@
+from typing import Optional
+
+from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+
 from api_mealdb import api
 from loader import bot, storage
 from utils.helpers import ListFactors, get_last_n_from_history
 from .states import ConversationStates, set_user_state
 from database.core import history_interface
-from typing import Optional
-from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-
 
 """
 states:

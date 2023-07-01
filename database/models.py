@@ -1,5 +1,7 @@
 from datetime import datetime
+
 import peewee as pw
+
 
 db_history = pw.SqliteDatabase("history.db")
 db_meal = pw.SqliteDatabase("meal.db")

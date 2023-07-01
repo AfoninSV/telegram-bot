@@ -1,8 +1,10 @@
+from typing import Optional, Dict
+
+import requests
+
 from config_data.config import api_settings
 from utils.helpers import my_zip
 from database.core import meal_interface
-from typing import Optional, Dict
-import requests
 
 
 headers = {
