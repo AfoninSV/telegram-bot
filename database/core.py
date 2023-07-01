@@ -11,9 +11,6 @@ db_history.create_tables([History])
 db_meal.connect()
 db_meal.create_tables([Meal])
 
-db_states.connect()
-db_states.create_tables([States])
-
 
 def is_exist(func_to_validate):
     """Validates if value exists in database"""
@@ -66,4 +63,3 @@ class DBInterface:
 
 history_interface = DBInterface(db_history, History)
 meal_interface = DBInterface(db_meal, Meal)
-states_interface = DBInterface(db_states, States)
