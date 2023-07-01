@@ -27,6 +27,8 @@ def cancel(message: Message) -> None:
     bot.send_message(message.chat.id, f'User: {message.from_user.id}\nChat: {message.chat.id}')
 
 
+# standard user commands
+
 @bot.message_handler(commands=['start', 'help'])
 def send_start(message: Message) -> None:
     """Sends message with commands and instructions"""
@@ -50,6 +52,11 @@ def low_high_start(message: Message) -> None:
         history_interface.insert(user_id=message.from_user.id, message='/high')
 
     commands.ask_category(message)
+
+
+@bot.message_handler(commands=['custom'])
+def custom(message: Message):
+    commands.ask_range(message)
 
 
 @bot.message_handler(commands=['random'])
@@ -81,6 +88,14 @@ def low_command_reply(message: Message) -> None:
 @bot.message_handler(state=ConversationStates.high_reply)
 def high_command_reply(message: Message) -> None:
     commands.high_reply(message)
+
+
+@bot.message_handler(state=ConversationStates.wait_range)
+def find_meals_range(message: Message):
+    if commands.check_range(message.text):
+        ...
+    else:
+        bot.send_message(message.chat.id, 'Wrong range, please check your numbers.')
 
 
 @bot.callback_query_handler(lambda call: True)

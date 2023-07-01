@@ -14,6 +14,7 @@ class ConversationStates(StatesGroup):
     low_reply = State()    # low_reply,
     high_reply = State()    # high_reply,
     wait_button = State()    # button_reply
+    wait_range = State()    # custom command
     wait_random = State()    # wait for random
     list_reply = State()    # ask for list type
 

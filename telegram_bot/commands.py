@@ -1,4 +1,6 @@
 from typing import Optional
+from string import ascii_lowercase
+import re
 
 from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -17,6 +19,7 @@ states:
     4: button_reply
     5: wait for random
     6: ask for list type
+    7: wait for range
 """
 
 
@@ -131,6 +134,21 @@ def lh_button_get(call) -> None:
 
     send_recipe_str(*get_recipe_str(meal_id=chosen_id), call.message)
     set_user_state(call.message, ConversationStates.cancel)
+
+
+def ask_range(message: Message):
+    bot.send_message(message.chat.id, 'Pleease, write range of ingredients quantity (format: number, number):')
+    set_user_state(message, ConversationStates.wait_range)
+
+
+def check_range(range_str: str) -> bool:
+    if match := re.match(r'\d+,\s*\d+', range_str):
+        start, end = range_str.split()
+        if end < start:
+            return False
+        return True
+    else:
+        return False
 
 
 def random_recipe(message: Message) -> None:
