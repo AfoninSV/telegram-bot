@@ -69,10 +69,12 @@ def get_meal_by_id(meal_id) -> dict:
     return response
 
 
-def get_meal_ingredients(meal_id) -> str:
+def get_meal_ingredients(meal_id, qty=False) -> str | int:
     """Returns meal ingredients by id"""
 
     if meal := meal_interface.read_by("meal_id", meal_id):
+        if qty:
+            return len(meal.get("ingredients").split('\n'))
         return meal.get("ingredients")
 
     meal = get_meal_by_id(meal_id)
@@ -80,6 +82,10 @@ def get_meal_ingredients(meal_id) -> str:
     measures = [meal.get(f"strMeasure{ingredient_num}") for ingredient_num in range(1, 21)]
 
     ingredient_list: str = "\n".join([f"{ingr} {meas}" for ingr, meas in my_zip(ingredients, measures)])
+
+    if qty:
+        return len(ingredient_list)
+
     meal_interface.insert(meal_id=meal_id, ingredients=ingredient_list)
 
     return ingredient_list
