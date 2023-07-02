@@ -37,9 +37,11 @@ class DBInterface:
         with self._db.atomic():
             self._model.create(**kwargs)
 
-    def update(self, column_name: str, value: Any, **kwargs):
+    def update(self, column_name: str, value: Any, field_name: str, field_value: Any):
         with self._db.atomic():
-            query = self._model.update({column_name: value}).where(self._model.user_id == kwargs['user_id'])
+            query = self._model.update({column_name: value}).where(
+                getattr(self._model, field_name) == field_value
+            )
             query.execute()
 
     def read_all(self):
