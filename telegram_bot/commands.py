@@ -143,12 +143,16 @@ def ask_range(message: Message):
 
 def check_range(range_str: str) -> bool:
     if match := re.match(r'\d+,\s*\d+', range_str):
-        start, end = range_str.split()
+        start, end = re.split(r',\s*', match.group(0))
+        start = int(start)
+        end = int(end)
         if end < start:
             return False
-        return True
-    else:
+    if not match:
         return False
+    if match.group(0) != range_str:
+        return False
+    return True
 
 
 def random_recipe(message: Message) -> None:
