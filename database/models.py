@@ -31,6 +31,7 @@ class Meal(BaseModel):
 
     meal_id = pw.TextField()
     ingredients = pw.TextField()
+    ingredients_qty = pw.IntegerField(null=True)
 
     class Meta:
         database = db_meal
