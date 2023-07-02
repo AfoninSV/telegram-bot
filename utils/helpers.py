@@ -8,6 +8,8 @@ class ListFactors:
     categories: str = "c"
     areas: str = "a"
     ingredients: str = "i"
+    search: str = "s"
+    first_letter: str = "f"
 
 
 def my_zip(list_ingr, list_measr) -> list[tuple]:
