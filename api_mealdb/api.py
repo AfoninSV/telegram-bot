@@ -100,6 +100,12 @@ def get_ingredients_qty(meal_id) -> int:
     return ingredients_qty
 
 
+def meals_by_first_letter(letter: str) -> list[dict]:
+    querystring = {'f': letter}
+    response = make_response('search', params=querystring)
+    return response
+
+
 def meals_by_qty(category_name) -> list:
     """
     Returns list of meals by ingredients quantity by category.
