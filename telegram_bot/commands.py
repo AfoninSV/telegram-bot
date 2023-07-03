@@ -158,7 +158,7 @@ def lh_button_get(call) -> None:
 
 
 def ask_range(message: Message):
-    bot.send_message(message.chat.id, 'Pleease, write range of ingredients quantity (format: number, number):')
+    bot.send_message(message.chat.id, 'Pleease, write range of ingredients quantity: \n(format: number, number or single number)')
     set_user_state(message, ConversationStates.wait_range)
 
 
@@ -169,21 +169,26 @@ def check_range(range_str: str) -> bool | list:
         end = int(end)
         if end < start:
             return False
-    if not match:
-        return False
-    if match.group(0) != range_str:
-        return False
-    return list(range(start, end + 1))
+        if match.group(0) != range_str:
+            return False
+        return list(range(start, end + 1))
+
+    if match := re.match(r'\d+', range_str):
+        if match.group(0) != range_str:
+            return False
+        return [int(match.group(0))]
 
 
 def check_all_for_qty(qty_range: list) -> list[dict]:
     fit = list()
     for letter in ascii_lowercase:
+        print(letter)
         meals: list = api.meals_by_first_letter(letter)
         if meals:
             for meal in meals:
                 if (qty := api.get_ingredients_qty(meal.get('idMeal'))) in qty_range:
                     fit.append(meal)
+                    print('found')
     return fit
 
 

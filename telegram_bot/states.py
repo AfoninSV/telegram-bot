@@ -21,7 +21,6 @@ class ConversationStates(StatesGroup):
 
 def get_user_state(message: Message):
     state = bot.get_state(message.from_user.id, chat_id=message.chat.id)
-    print(state)
     return state
 
 

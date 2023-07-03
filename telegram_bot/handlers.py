@@ -98,6 +98,8 @@ def find_meals_range(message: Message):
     if range_list := commands.check_range(given_range):
         bot.send_message(message.chat.id, 'Searching...')
         meals_found = commands.check_all_for_qty(range_list)
+        if not meals_found:
+            bot.send_message(message.chat.id, 'Sorry, nothing found.')
         commands.send_multiple_recipes(message, meals_found)
     else:
         bot.send_message(message.chat.id, 'Wrong range, please check your numbers.')
@@ -108,7 +110,10 @@ def button(call) -> None:
     """Handles the button callback query, retrieves the chosen recipe, and sends the recipe details"""
 
     msg = call.message
-    uid = call.message.chat.id    # bug: gets incorrect user id, chat id - works
+    if msg.from_user.is_bot:
+        msg.from_user.id = msg.chat.id
+    uid = msg.from_user.id
+    cid = call.message.chat.id
 
     if call.data.isdigit():
         commands.lh_button_get(call)
@@ -118,10 +123,10 @@ def button(call) -> None:
         commands.list_reply(msg, commands.ListFactors.__dict__.get(call.data))
 
     elif call.data == 'meals_list':
-        with bot.retrieve_data(uid, uid) as data:
+        with bot.retrieve_data(uid, cid) as data:
             meals_list = data.get('meals_list')
         commands.send_multiple_recipes(msg, meals_list)
 
     elif call.data == 'cancel':
-        set_user_state(call.message, ConversationStates.cancel)
+        set_user_state(msg, ConversationStates.cancel)
         bot.send_message(msg.chat.id, 'Enjoy!.')
