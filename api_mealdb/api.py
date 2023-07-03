@@ -116,10 +116,8 @@ def meals_by_qty(category_name) -> list:
     for meal in meals_list:
         # Get ID from meal dict
         meal_id = meal.get("idMeal")
-        # Get ingredients of meal
-        ingredients_list = get_meal_ingredients(meal_id)
         # Get len of ingredients list
-        ingredients_qty = len(ingredients_list.split("\n"))
+        ingredients_qty = get_ingredients_qty(meal_id)
         # Write quantity to meal dictionary
         meal["ingredients_qty"] = ingredients_qty
 
