@@ -1,7 +1,9 @@
+import json
+
 from telebot.types import Message
 
 from . import commands
-from .states import ConversationStates, get_user_state
+from .states import ConversationStates, get_user_state, set_user_state
 from utils.helpers import start_message, get_last_n_from_history
 from database.core import history_interface
 from loader import bot
@@ -105,8 +107,21 @@ def find_meals_range(message: Message):
 def button(call) -> None:
     """Handles the button callback query, retrieves the chosen recipe, and sends the recipe details"""
 
+    msg = call.message
+    uid = call.message.chat.id    # bug: gets incorrect user id, chat id - works
+
     if call.data.isdigit():
         commands.lh_button_get(call)
+
     elif call.data in {'areas', 'categories', 'ingredients'}:
-        commands.set_user_state(call.message, ConversationStates.list_reply)
-        commands.list_reply(call.message, commands.ListFactors.__dict__.get(call.data))
+        commands.set_user_state(msg, ConversationStates.list_reply)
+        commands.list_reply(msg, commands.ListFactors.__dict__.get(call.data))
+
+    elif call.data == 'meals_list':
+        with bot.retrieve_data(uid, uid) as data:
+            meals_list = data.get('meals_list')
+        commands.send_multiple_recipes(msg, meals_list)
+
+    elif call.data == 'cancel':
+        set_user_state(call.message, ConversationStates.cancel)
+        bot.send_message(msg.chat.id, 'Enjoy!.')

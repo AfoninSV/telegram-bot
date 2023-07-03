@@ -1,6 +1,7 @@
 from typing import Optional
 from string import ascii_lowercase
 import re
+import json
 
 from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -128,9 +129,23 @@ def send_recipe_str(recipe_picture: str, recipe_str: str, message: Message) -> N
 
 
 def send_multiple_recipes(message: Message, meals_list: list) -> None:
-    for meal in meals_list:
+    for i_meal, meal in enumerate(meals_list):
+        if i_meal >= 2:
+            set_user_state(message, ConversationStates.wait_button)
+            with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+                data['meals_list'] = meals_list
+
+            keyboard = InlineKeyboardMarkup()
+            keyboard.add(InlineKeyboardButton(text='Yes', callback_data='meals_list'))
+            keyboard.add(InlineKeyboardButton(text='Cancel', callback_data='cancel'))
+            bot.send_message(message.chat.id, 'Show more?', reply_markup=keyboard)
+
+
+            break
         send_recipe_str(*get_recipe_str(meal=meal), message)
-    set_user_state(message, ConversationStates.cancel)
+        meals_list.pop(i_meal)
+    else:
+        set_user_state(message, ConversationStates.cancel)
 
 
 def lh_button_get(call) -> None:
