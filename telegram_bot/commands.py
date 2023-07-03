@@ -127,6 +127,12 @@ def send_recipe_str(recipe_picture: str, recipe_str: str, message: Message) -> N
         bot.send_message(message.chat.id, recipe_str)
 
 
+def send_multiple_recipes(message: Message, meals_list: list) -> None:
+    for meal in meals_list:
+        send_recipe_str(*get_recipe_str(meal=meal), message)
+    set_user_state(message, ConversationStates.cancel)
+
+
 def lh_button_get(call) -> None:
     """Handles the button callback query, retrieves the chosen recipe, and sends the recipe details"""
 
@@ -141,7 +147,7 @@ def ask_range(message: Message):
     set_user_state(message, ConversationStates.wait_range)
 
 
-def check_range(range_str: str) -> bool:
+def check_range(range_str: str) -> bool | list:
     if match := re.match(r'\d+,\s*\d+', range_str):
         start, end = re.split(r',\s*', match.group(0))
         start = int(start)
@@ -152,7 +158,19 @@ def check_range(range_str: str) -> bool:
         return False
     if match.group(0) != range_str:
         return False
-    return True
+    return list(range(start, end + 1))
+
+
+def check_all_for_qty(qty_range: list) -> list[dict]:
+    fit = list()
+    for letter in ascii_lowercase:
+        meals: list = api.meals_by_first_letter(letter)
+        if meals:
+            for meal in meals:
+                if (qty := api.get_ingredients_qty(meal.get('idMeal'))) in qty_range:
+                    fit.append(meal)
+    return fit
+
 
 
 def random_recipe(message: Message) -> None:

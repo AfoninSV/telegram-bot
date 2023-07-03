@@ -92,8 +92,11 @@ def high_command_reply(message: Message) -> None:
 
 @bot.message_handler(state=ConversationStates.wait_range)
 def find_meals_range(message: Message):
-    if commands.check_range(message.text):
-        ...
+    given_range = message.text
+    if range_list := commands.check_range(given_range):
+        bot.send_message(message.chat.id, 'Searching...')
+        meals_found = commands.check_all_for_qty(range_list)
+        commands.send_multiple_recipes(message, meals_found)
     else:
         bot.send_message(message.chat.id, 'Wrong range, please check your numbers.')
 
