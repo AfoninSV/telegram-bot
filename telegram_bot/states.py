@@ -16,6 +16,8 @@ class ConversationStates(StatesGroup):
     wait_button = State()    # button_reply
     wait_range = State()    # custom command
     wait_random = State()    # wait for random
+    wait_search = State()    # wait for search type reply
+    wait_name = State()    # wait for meal name
     list_reply = State()    # ask for list type
 
 
