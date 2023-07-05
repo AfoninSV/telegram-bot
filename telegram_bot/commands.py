@@ -156,10 +156,12 @@ def lh_button_get(call) -> None:
     send_recipe_str(*get_recipe_str(meal_id=chosen_id), call.message)
     set_user_state(call.message, ConversationStates.cancel)
 
+def ask_for(message: Message, ask_text: str,
+            state: Optional[ConversationStates]=None) -> None:
+    bot.send_message(message.chat.id, ask_text)
 
-def ask_range(message: Message):
-    bot.send_message(message.chat.id, 'Pleease, write range of ingredients quantity: \n(format: number, number or single number)')
-    set_user_state(message, ConversationStates.wait_range)
+    if state:
+        set_user_state(message, state)
 
 
 def check_range(range_str: str) -> bool | list:
@@ -211,6 +213,7 @@ def ask_for_list(message: Message) -> None:
     bot.send_message(message.chat.id, 'Please choose the type of desired list:', reply_markup=keyboard)
     set_user_state(message, ConversationStates.cancel)
 
+
 def list_reply(message: Message, factor: str) -> None:
     names_list = api.get_list_by_key(factor)
     names_str = ", ".join(names_list)
@@ -224,3 +227,20 @@ def list_reply(message: Message, factor: str) -> None:
     else:
         bot.send_message(message.chat.id, names_str)
     set_user_state(message, ConversationStates.cancel)
+
+
+def find_name(message: Message, name: str) -> None:
+    if meal := api.get_meal_by_name(name):
+        send_recipe_str(*get_recipe_str(meal=meal), message)
+        set_user_state(message, ConversationStates.cancel)
+    else:
+        bot.send_message(message.chat.id, 'Meal with such name not found, try again:')
+
+
+
+def search_markup(message: Message) -> None:
+    keyboard = InlineKeyboardMarkup()
+    keyboard.add(InlineKeyboardButton('By meal name', callback_data='by name'))
+    keyboard.add(InlineKeyboardButton('By meal ingredients', callback_data='by ingredients'))
+    bot.send_message(message.chat.id, 'Select which search would you like to perform:',
+                     reply_markup=keyboard)

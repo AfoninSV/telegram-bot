@@ -58,7 +58,8 @@ def low_high_start(message: Message) -> None:
 
 @bot.message_handler(commands=['custom'])
 def custom(message: Message):
-    commands.ask_range(message)
+    ask_string = 'Please, write range of ingredients quantity: \n(format: number, number or single number)'
+    commands.ask_for(message, ask_string, state=ConversationStates.wait_range)
 
 
 @bot.message_handler(commands=['random'])
@@ -71,6 +72,12 @@ def random(message: Message) -> None:
 def list_start(message: Message) -> None:
     commands.set_user_state(message, ConversationStates.list_reply)
     commands.ask_for_list(message)
+
+
+@bot.message_handler(commands=['search'])
+def search_start(message: Message) -> None:
+    commands.set_user_state(message, ConversationStates.wait_button)
+    commands.search_markup(message)
 
 
 @bot.message_handler(commands=['history'])
@@ -105,6 +112,11 @@ def find_meals_range(message: Message):
         bot.send_message(message.chat.id, 'Wrong range, please check your numbers.')
 
 
+@bot.message_handler(state=ConversationStates.wait_name)
+def find_by_name(message: Message):
+    commands.find_name(message, message.text)
+
+
 @bot.callback_query_handler(lambda call: True)
 def button(call) -> None:
     """Handles the button callback query, retrieves the chosen recipe, and sends the recipe details"""
@@ -126,6 +138,13 @@ def button(call) -> None:
         with bot.retrieve_data(uid, cid) as data:
             meals_list = data.get('meals_list')
         commands.send_multiple_recipes(msg, meals_list)
+
+    elif call.data == 'by name':
+        commands.ask_for(msg, 'Please, write meal name to search:',
+                         state=ConversationStates.wait_name)
+
+    elif call.data == 'by ingredients':
+        ...
 
     elif call.data == 'cancel':
         set_user_state(msg, ConversationStates.cancel)
