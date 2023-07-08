@@ -148,13 +148,13 @@ def send_multiple_recipes(message: Message, meals_list: list) -> None:
         set_user_state(message, ConversationStates.cancel)
 
 
-def lh_button_get(call) -> None:
+def meal_id_button_get(call) -> None:
     """Handles the button callback query, retrieves the chosen recipe, and sends the recipe details"""
 
     chosen_id = call.data
-
     send_recipe_str(*get_recipe_str(meal_id=chosen_id), call.message)
     set_user_state(call.message, ConversationStates.cancel)
+
 
 def ask_for(message: Message, ask_text: str,
             state: Optional[ConversationStates]=None) -> None:
@@ -230,9 +230,18 @@ def list_reply(message: Message, factor: str) -> None:
 
 
 def find_name(message: Message, name: str) -> None:
-    if meal := api.get_meal_by_name(name):
-        send_recipe_str(*get_recipe_str(meal=meal), message)
-        set_user_state(message, ConversationStates.cancel)
+    if meals := api.get_meal_by_name(name):
+        if len(meals) == 1:
+            send_recipe_str(*get_recipe_str(meal=meal), message)
+            set_user_state(message, ConversationStates.cancel)
+        else:
+            keyboard = InlineKeyboardMarkup()
+            for meal in meals:
+                meal_name = meal.get('strMeal')
+                meal_id = meal.get('idMeal')
+                keyboard.add(InlineKeyboardButton(meal_name, callback_data=meal_id))
+            bot.send_message(message.chat.id, 'Chose meal you want to see:', reply_markup=keyboard)
+
     else:
         bot.send_message(message.chat.id, 'Meal with such name not found, try again:')
 
