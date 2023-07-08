@@ -61,7 +61,7 @@ def low_high_start(message: Message) -> None:
 @bot.message_handler(commands=['custom'])
 def custom(message: Message):
     history_interface.insert(user_id=message.from_user.id, message='/custom')
-    ask_string = 'Please, write range of ingredients quantity: \n(format: number, number or single number)'
+    ask_string = "Please write the range of ingredient quantities:\n\nFormat: 'number, number' or 'single number'"
     commands.ask_for(message, ask_string, state=ConversationStates.wait_range)
 
 
@@ -90,7 +90,8 @@ def search_start(message: Message) -> None:
 def history(message: Message) -> None:
     history_interface.insert(user_id=message.from_user.id, message='/history')
     history_reply = get_last_n_from_history(10, int(message.from_user.id))
-    reply_str = '\n'.join(history_reply)
+    reply_str = map(lambda tpl: f'{tpl[0]}: {tpl[1]}', history_reply)
+    reply_str = '\n'.join(list(reply_str)[1:])
     bot.send_message(message.chat.id, reply_str)
 
 
@@ -112,20 +113,23 @@ def find_meals_range(message: Message):
     if range_list := commands.check_range(given_range):
         bot.send_message(message.chat.id, 'Searching...')
         meals_found = commands.check_all_for_qty(range_list)
+
         if not meals_found:
             bot.send_message(message.chat.id, 'Sorry, nothing found.')
-        commands.send_multiple_recipes(message, meals_found)
+            return
+
+        commands.reply_markup(message, 'Chose meal to see recipe:', meals_list=meals_found)
     else:
         bot.send_message(message.chat.id, 'Wrong range, please check your numbers.')
 
 
 @bot.message_handler(state=ConversationStates.wait_name)
-def find_by_name(message: Message):
+def respond_for_name(message: Message):
     commands.find_by_name(message, message.text)
 
 
 @bot.message_handler(state=ConversationStates.wait_ingredients)
-def find_by_name(message: Message):
+def respond_for_ingredients(message: Message):
     if ingredients_list := commands.check_ingredinets_list(message):
         commands.reply_search_by_ingredients(message, ingredients_list)
     else:

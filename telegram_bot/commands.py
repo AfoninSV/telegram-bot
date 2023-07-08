@@ -24,15 +24,14 @@ states:
 """
 
 
-def get_last_user_msg(message):
-    history_interface.read_by('user_id', message.from_user.id)
-
-
 def ask_category(message) -> None:
     """Send message asking to input desired category"""
 
-    last_command = get_last_n_from_history(1, message.from_user.id)
+    last_command = get_last_n_from_history(1, message.from_user.id)[0][1]
+    categories_str = ", ".join(api.get_list_by_key(Factors.categories))
+    bot.send_message(message.chat.id, f'Available categories:\n{categories_str}')
     bot.send_message(message.chat.id, 'Please enter the category name:')
+
 
     if last_command == '/low':
         set_user_state(message, ConversationStates.low_reply)
@@ -184,13 +183,11 @@ def check_range(range_str: str) -> bool | list:
 def check_all_for_qty(qty_range: list) -> list[dict]:
     fit = list()
     for letter in ascii_lowercase:
-        print(letter)
         meals: list = api.meals_by_first_letter(letter)
         if meals:
             for meal in meals:
                 if (qty := api.get_ingredients_qty(meal.get('idMeal'))) in qty_range:
                     fit.append(meal)
-                    print('found')
     return fit
 
 
@@ -268,6 +265,23 @@ def reply_search_by_ingredients(message: Message, ingredients_list: list):
         set_user_state(message, ConversationStates.cancel)
     else:
         bot.send_message(message.chat.id, 'Nothing found, try again:')
+
+def reply_markup(message, msg_to_ask: str,
+                 button_text: list=None,
+                 callback_data: list=None,
+                 meals_list=None) -> None:
+    """Sends message with keyboard markup with given data"""
+
+    if meals_list:
+        button_text = list()
+        callback_data = list()
+        for meal in meals_list:
+            button_text.append(meal.get('strMeal'))
+            callback_data.append(meal.get('idMeal'))
+    keyboard = InlineKeyboardMarkup()
+    for txt, id in zip(button_text, callback_data):
+        keyboard.add(InlineKeyboardButton(txt, callback_data=id))
+    bot.send_message(message.chat.id, msg_to_ask, reply_markup=keyboard)
 
 
 def search_markup(message: Message) -> None:

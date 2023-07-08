@@ -39,17 +39,17 @@ def history_clean(user_id):
             db.delete(record.id_key)
 
 
-def get_last_n_from_history(n: int, user_id: int):
+def get_last_n_from_history(n: int, user_id: int) -> list[tuple] | str:
     n = n + 2
     db = history_interface
     values = db.read_all()
     
-    sorted_values = [f'{row.date_time}: {row.message}' for row in values if row.user_id == user_id]
+    sorted_values = [(row.date_time, row.message) for row in values if row.user_id == user_id]
     history_clean(user_id)
 
     if sorted_values:
         if len(sorted_values) >= n:
-            return sorted_values[-2:-n:-1]
+            return sorted_values[:-n:-1]
     return 'History is empty.'
 
 
