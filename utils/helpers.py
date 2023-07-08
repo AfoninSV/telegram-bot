@@ -59,6 +59,11 @@ Welcome to the Telegram Recipe Bot!
 Our bot helps you discover various cooking recipes. 
 Whether you want something simple or more challenging, we've got you covered.
 
+Happy cooking!
+"""
+
+
+help_message = """
 Here are the core commands our bot supports:
 
 - /low: Find easy recipes based on the number of ingredients. Specify a dish type (e.g., "dessert" or "main course") to get simple recipes in that category.
@@ -66,8 +71,7 @@ Here are the core commands our bot supports:
 - /custom: Specify a range of ingredients, and the bot will find recipes within that range.
 - /random: Discover new recipes with a random suggestion.
 - /search: Find recipes that include a specific ingredient or by name.
-- /list: Get a list of all categories, areas, and ingredients.
+- /list: Get a list of all categories, areas, or ingredients.
 - /history: See your last ten queries.
-
-Happy cooking!
+- /cancel: Cancel actual operation (or just use another command).
 """

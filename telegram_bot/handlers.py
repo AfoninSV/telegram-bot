@@ -2,7 +2,7 @@ from telebot.types import Message
 
 from . import commands
 from .states import ConversationStates, get_user_state, set_user_state
-from utils.helpers import start_message, get_last_n_from_history
+from utils.helpers import start_message, help_message, get_last_n_from_history
 from database.core import history_interface
 from loader import bot
 
@@ -29,16 +29,20 @@ def cancel(message: Message) -> None:
 
 # standard user commands
 
-@bot.message_handler(commands=['start', 'help'])
+@bot.message_handler(commands=['start'])
 def send_start(message: Message) -> None:
-    """Sends message with commands and instructions"""
+    """Sends welcoming message"""
 
-    if message.text == '/start':
-        history_interface.insert(user_id=message.from_user.id, message='/start')
-    elif message.text == '/help':
-        history_interface.insert(user_id=message.from_user.id, message='/help')
-
+    history_interface.insert(user_id=message.from_user.id, message='/start')
     bot.send_message(message.chat.id, start_message)
+    commands.set_user_state(message, ConversationStates.cancel)
+
+
+@bot.message_handler(commands=['help'])
+def send_start(message: Message) -> None:
+    """Send message with commands and instructions"""
+    history_interface.insert(user_id=message.from_user.id, message='/help')
+    bot.send_message(message.chat.id, help_message)
     commands.set_user_state(message, ConversationStates.cancel)
 
 
