@@ -1,5 +1,3 @@
-import json
-
 from telebot.types import Message
 
 from . import commands
@@ -128,7 +126,7 @@ def button(call) -> None:
     cid = call.message.chat.id
 
     if call.data.isdigit():
-        commands.lh_button_get(call)
+        commands.meal_id_button_get(call)
 
     elif call.data in {'areas', 'categories', 'ingredients'}:
         commands.set_user_state(msg, ConversationStates.list_reply)
