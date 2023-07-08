@@ -85,7 +85,7 @@ def search_start(message: Message) -> None:
 @bot.message_handler(commands=['history'])
 def history(message: Message) -> None:
     history_interface.insert(user_id=message.from_user.id, message='/history')
-    history_reply = get_last_n_from_history(10, str(message.from_user.id))
+    history_reply = get_last_n_from_history(10, int(message.from_user.id))
     reply_str = '\n'.join(history_reply)
     bot.send_message(message.chat.id, reply_str)
 
