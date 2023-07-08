@@ -205,7 +205,7 @@ def ask_for_list(message: Message) -> None:
     """Sends message asking for type of list and make buttons for reply"""
 
     keyboard = InlineKeyboardMarkup()
-    for type in [type for type in dir(Factors) if not type.startswith('__')]:
+    for type in {'areas', 'categories', 'ingredients'}:
         button = InlineKeyboardButton(text=type,
                                       callback_data=type)
         keyboard.add(button)
