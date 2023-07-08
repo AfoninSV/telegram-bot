@@ -18,6 +18,7 @@ class ConversationStates(StatesGroup):
     wait_random = State()    # wait for random
     wait_search = State()    # wait for search type reply
     wait_name = State()    # wait for meal name
+    wait_ingredients = State()    # wait for ingredients
     list_reply = State()    # ask for list type
 
 
