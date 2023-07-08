@@ -9,7 +9,7 @@ from loader import bot
 
 @bot.message_handler(commands=['cancel'])
 def cancel(message: Message) -> None:
-    history_interface.insert(user_id=message.from_user.id, message='/cancel')
+    # history_interface.insert(user_id=message.from_user.id, message='/cancel')
     commands.set_user_state(message, ConversationStates.cancel)
 
 
@@ -56,30 +56,35 @@ def low_high_start(message: Message) -> None:
 
 @bot.message_handler(commands=['custom'])
 def custom(message: Message):
+    history_interface.insert(user_id=message.from_user.id, message='/custom')
     ask_string = 'Please, write range of ingredients quantity: \n(format: number, number or single number)'
     commands.ask_for(message, ask_string, state=ConversationStates.wait_range)
 
 
 @bot.message_handler(commands=['random'])
 def random(message: Message) -> None:
+    history_interface.insert(user_id=message.from_user.id, message='/random')
     commands.set_user_state(message, ConversationStates.wait_random)
     commands.random_recipe(message)
 
 
 @bot.message_handler(commands=['list'])
 def list_start(message: Message) -> None:
+    history_interface.insert(user_id=message.from_user.id, message='/list')
     commands.set_user_state(message, ConversationStates.list_reply)
     commands.ask_for_list(message)
 
 
 @bot.message_handler(commands=['search'])
 def search_start(message: Message) -> None:
+    history_interface.insert(user_id=message.from_user.id, message='/search')
     commands.set_user_state(message, ConversationStates.wait_button)
     commands.search_markup(message)
 
 
 @bot.message_handler(commands=['history'])
 def history(message: Message) -> None:
+    history_interface.insert(user_id=message.from_user.id, message='/history')
     history_reply = get_last_n_from_history(10, str(message.from_user.id))
     reply_str = '\n'.join(history_reply)
     bot.send_message(message.chat.id, reply_str)
@@ -112,7 +117,15 @@ def find_meals_range(message: Message):
 
 @bot.message_handler(state=ConversationStates.wait_name)
 def find_by_name(message: Message):
-    commands.find_name(message, message.text)
+    commands.find_by_name(message, message.text)
+
+
+@bot.message_handler(state=ConversationStates.wait_ingredients)
+def find_by_name(message: Message):
+    if ingredients_list := commands.check_ingredinets_list(message):
+        commands.reply_search_by_ingredients(message, ingredients_list)
+    else:
+        bot.send_message(message.chat.id, 'Sorry, nothing found. Please, check your ingredients list.')
 
 
 @bot.callback_query_handler(lambda call: True)
@@ -130,7 +143,7 @@ def button(call) -> None:
 
     elif call.data in {'areas', 'categories', 'ingredients'}:
         commands.set_user_state(msg, ConversationStates.list_reply)
-        commands.list_reply(msg, commands.ListFactors.__dict__.get(call.data))
+        commands.list_reply(msg, commands.Factors.__dict__.get(call.data))
 
     elif call.data == 'meals_list':
         with bot.retrieve_data(uid, cid) as data:
@@ -142,7 +155,8 @@ def button(call) -> None:
                          state=ConversationStates.wait_name)
 
     elif call.data == 'by ingredients':
-        ...
+        commands.ask_for(msg, 'Please, write ingredients separated by comma',
+                         state=ConversationStates.wait_ingredients)
 
     elif call.data == 'cancel':
         set_user_state(msg, ConversationStates.cancel)
