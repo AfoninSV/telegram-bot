@@ -3,7 +3,7 @@ from typing import Optional, Dict
 import requests
 
 from config_data.config import api_settings
-from utils.helpers import my_zip
+from utils.helpers import my_zip, Factors
 from database.core import meal_interface
 
 
@@ -13,7 +13,7 @@ headers = {
 }
 
 
-def make_response(url_action: str, headers: Dict[str, str]=headers, params: Optional[Dict] = None) -> list:
+def make_response(url_action: str, params: Optional[Dict] = None, headers: Dict[str, str]=headers) -> list:
     url = f"https://themealdb.p.rapidapi.com/{url_action}.php"
     response = requests.get(url, headers=headers, params=params).json().get("meals")
     return response
@@ -63,6 +63,13 @@ def get_meal_by_id(meal_id) -> dict:
     querystring = {"i": str(meal_id)}
     if response := make_response("lookup", params=querystring):
         return response[0]
+
+
+def search_by_ingredients(ingredients: list):
+    """Returns list of meals by given ingredients"""
+    querystring = {Factors.ingredients: ingredients}
+    responce = make_response('filter', params=querystring)
+    return responce
 
 
 def get_meal_ingredients(meal_id) -> str:
