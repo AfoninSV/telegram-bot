@@ -248,14 +248,15 @@ def check_ingredinets_list(message: Message) -> list:
     whitespaces are changed with _ """
 
     ingredients_string = message.text.strip()
-    ingredients_list = re.split(r',\s*', ingredients_string)
+    ingredients_list = re.split(r',\s*', ingredients_string.lower())
     ingredients_list = [re.sub(r'\s+', '_', name) if re.search(r'\s+', name) else name
                         for name in ingredients_list]
     return ingredients_list
 
 
 def reply_search_by_ingredients(message: Message, ingredients_list: list):
-    meals: list = api.search_by_ingredients(ingredients_list)
+    ingredients = ','.join(ingredients_list)
+    meals: list = api.search_by_ingredients(ingredients)
     if meals:
         keyboard = InlineKeyboardMarkup()
         for name, id in [(meal.get('strMeal'), meal.get('idMeal')) for meal in meals]:

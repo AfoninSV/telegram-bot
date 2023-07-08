@@ -65,11 +65,11 @@ def get_meal_by_id(meal_id) -> dict:
         return response[0]
 
 
-def search_by_ingredients(ingredients: list):
+def search_by_ingredients(ingredients: str):
     """Returns list of meals by given ingredients"""
     querystring = {Factors.ingredients: ingredients}
-    responce = make_response('filter', params=querystring)
-    return responce
+    response = make_response('filter', params=querystring)
+    return response
 
 
 def get_meal_ingredients(meal_id) -> str:
