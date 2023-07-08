@@ -7,7 +7,7 @@ from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 
 from api_mealdb import api
 from loader import bot, storage
-from utils.helpers import ListFactors, get_last_n_from_history
+from utils.helpers import Factors, get_last_n_from_history
 from .states import ConversationStates, set_user_state
 from database.core import history_interface
 
@@ -44,7 +44,7 @@ def category_not_found(message: Message) -> None:
     """Sends message informing that looked database wasn't found and
     sends existed fields"""
 
-    categories_str = ", ".join(api.get_list_by_key(ListFactors.categories))
+    categories_str = ", ".join(api.get_list_by_key(Factors.categories))
     bot.send_message(message.chat.id, f'Category not found, please see categories below: '
                                       f'\n\n{categories_str}')
     bot.send_message(message.chat.id, "Try again: ")
@@ -205,7 +205,7 @@ def ask_for_list(message: Message) -> None:
     """Sends message asking for type of list and make buttons for reply"""
 
     keyboard = InlineKeyboardMarkup()
-    for type in [type for type in dir(ListFactors) if not type.startswith('__')]:
+    for type in [type for type in dir(Factors) if not type.startswith('__')]:
         button = InlineKeyboardButton(text=type,
                                       callback_data=type)
         keyboard.add(button)
@@ -229,10 +229,10 @@ def list_reply(message: Message, factor: str) -> None:
     set_user_state(message, ConversationStates.cancel)
 
 
-def find_name(message: Message, name: str) -> None:
+def find_by_name(message: Message, name: str) -> None:
     if meals := api.get_meal_by_name(name):
         if len(meals) == 1:
-            send_recipe_str(*get_recipe_str(meal=meal), message)
+            send_recipe_str(*get_recipe_str(meal=meals[0]), message)
             set_user_state(message, ConversationStates.cancel)
         else:
             keyboard = InlineKeyboardMarkup()
@@ -243,8 +243,31 @@ def find_name(message: Message, name: str) -> None:
             bot.send_message(message.chat.id, 'Chose meal you want to see:', reply_markup=keyboard)
 
     else:
-        bot.send_message(message.chat.id, 'Meal with such name not found, try again:')
+        bot.send_message(message.chat.id, 'Nothing found, try again:')
 
+
+def check_ingredinets_list(message: Message) -> list:
+    """Turns string list divided by commas with list of words,
+    whitespaces are changed with _ """
+
+    ingredients_string = message.text.strip()
+    ingredients_list = re.split(r',\s*', ingredients_string)
+    ingredients_list = [re.sub(r'\s+', '_', name) if re.search(r'\s+', name) else name
+                        for name in ingredients_list]
+    return ingredients_list
+
+
+def reply_search_by_ingredients(message: Message, ingredients_list: list):
+    meals: list = api.search_by_ingredients(ingredients_list)
+    if meals:
+        keyboard = InlineKeyboardMarkup()
+        for name, id in [(meal.get('strMeal'), meal.get('idMeal')) for meal in meals]:
+            keyboard.add(InlineKeyboardButton(name, callback_data=id))
+        bot.send_message(message.chat.id, 'Select which meal would you like to see:',
+                         reply_markup=keyboard)
+        set_user_state(message, ConversationStates.cancel)
+    else:
+        bot.send_message(message.chat.id, 'Nothing found, try again:')
 
 
 def search_markup(message: Message) -> None:
