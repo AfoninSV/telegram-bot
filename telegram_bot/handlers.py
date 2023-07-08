@@ -83,7 +83,9 @@ def list_start(message: Message) -> None:
 def search_start(message: Message) -> None:
     history_interface.insert(user_id=message.from_user.id, message='/search')
     commands.set_user_state(message, ConversationStates.wait_button)
-    commands.search_markup(message)
+    reply_data = ['by name', 'by ingredients']
+    commands.reply_markup(message, 'Select which search would you like to perform:',
+                          button_text=reply_data, callback_data=reply_data)
 
 
 @bot.message_handler(commands=['history'])

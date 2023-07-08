@@ -272,21 +272,14 @@ def reply_markup(message, msg_to_ask: str,
                  meals_list=None) -> None:
     """Sends message with keyboard markup with given data"""
 
+    keyboard = InlineKeyboardMarkup()
     if meals_list:
         button_text = list()
         callback_data = list()
         for meal in meals_list:
             button_text.append(meal.get('strMeal'))
             callback_data.append(meal.get('idMeal'))
-    keyboard = InlineKeyboardMarkup()
+
     for txt, id in zip(button_text, callback_data):
         keyboard.add(InlineKeyboardButton(txt, callback_data=id))
     bot.send_message(message.chat.id, msg_to_ask, reply_markup=keyboard)
-
-
-def search_markup(message: Message) -> None:
-    keyboard = InlineKeyboardMarkup()
-    keyboard.add(InlineKeyboardButton('By meal name', callback_data='by name'))
-    keyboard.add(InlineKeyboardButton('By meal ingredients', callback_data='by ingredients'))
-    bot.send_message(message.chat.id, 'Select which search would you like to perform:',
-                     reply_markup=keyboard)
