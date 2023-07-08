@@ -34,15 +34,13 @@ def get_list_by_key(list_factor: str) -> list:
     return items_names
 
 
-def get_meal_by_name(meal_name: str) -> Optional[dict]:
+def get_meal_by_name(meal_name: str) -> Optional[list[dict]]:
     """Returns list of meals by name or None"""
 
     querystring = {"s": meal_name}
     response: list[dict] = make_response("search", params=querystring)
 
-    if response:
-        response: dict[int, dict] = {item[0]: item[1] for item in enumerate(response, start=1)}
-        return response
+    return response
 
 
 def get_random_meal() -> dict:
@@ -63,8 +61,8 @@ def get_meal_by_id(meal_id) -> dict:
     """Returns meal's description by id"""
 
     querystring = {"i": str(meal_id)}
-    response: dict = make_response("lookup", params=querystring)[0]
-    return response
+    if response := make_response("lookup", params=querystring):
+        return response[0]
 
 
 def get_meal_ingredients(meal_id) -> str:
