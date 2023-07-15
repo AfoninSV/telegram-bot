@@ -180,6 +180,8 @@ def check_range(range_str: str) -> bool | list:
     if match := re.match(r'\d+', range_str):
         if match.group(0) != range_str:
             return False
+        if (int(match.group(0)) > 99) or (int(match.group(0)) <= 0):
+            return False
         return [int(match.group(0))]
 
 
