@@ -39,7 +39,7 @@ def history_clean(user_id):
             db.delete(record.id_key)
 
 
-def get_last_n_from_history(n: int, user_id: int) -> list[tuple] | str:
+def get_last_n_from_history(n: int, user_id: int) -> list[tuple] | None:
     n = n + 2
     db = history_interface
     values = db.read_all()
@@ -50,7 +50,8 @@ def get_last_n_from_history(n: int, user_id: int) -> list[tuple] | str:
     if sorted_values:
         if len(sorted_values) >= n:
             return sorted_values[:-n:-1]
-    return 'History is empty.'
+        else:
+            return sorted_values
 
 
 start_message = """

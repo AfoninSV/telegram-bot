@@ -24,7 +24,7 @@ states:
 """
 
 
-def ask_category(message) -> None:
+def ask_category(message) -> None:    #TODO change string to markup
     """Send message asking to input desired category"""
 
     last_command = get_last_n_from_history(1, message.from_user.id)[0][1]

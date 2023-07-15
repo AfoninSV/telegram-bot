@@ -90,11 +90,14 @@ def search_start(message: Message) -> None:
 
 @bot.message_handler(commands=['history'])
 def history(message: Message) -> None:
-    history_interface.insert(user_id=message.from_user.id, message='/history')
     history_reply = get_last_n_from_history(10, int(message.from_user.id))
-    reply_str = map(lambda tpl: f'{tpl[0]}: {tpl[1]}', history_reply)
-    reply_str = '\n'.join(list(reply_str)[1:])
-    bot.send_message(message.chat.id, reply_str)
+    if history_reply:
+        reply_str = map(lambda tpl: f'{tpl[0]}: {tpl[1]}', history_reply)
+        reply_str = '\n'.join(list(reply_str))
+        bot.send_message(message.chat.id, reply_str)
+    else:
+        bot.send_message(message.chat.id, 'History is empty, welcome on board!')
+    history_interface.insert(user_id=message.from_user.id, message='/history')
 
 
 # state handlers
