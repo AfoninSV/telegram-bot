@@ -7,9 +7,13 @@ from database.core import history_interface
 from loader import bot
 
 
+@bot.message_handler(func=lambda message: 'hello' in message.text.lower())
+def cancel(message: Message) -> None:
+    bot.send_message(message.chat.id, "Hello, dear friend! It's nice to see you.")
+
+
 @bot.message_handler(commands=['cancel'])
 def cancel(message: Message) -> None:
-    # history_interface.insert(user_id=message.from_user.id, message='/cancel')
     commands.set_user_state(message, ConversationStates.cancel)
 
 

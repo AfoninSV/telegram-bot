@@ -108,9 +108,9 @@ def get_recipe_str(meal_id: Optional[str]=None, meal:Optional[dict]=None) -> tup
     reply_str = str()
     reply_str += f"Name: {meal.get('strMeal')}\n" \
                  f"Category: {meal.get('strCategory')}\n" \
-                 f"Area: {meal.get('strArea')}\n" \
-                 f"Ingredients: {ingredients_str}" \
-                 f"\n\nInstruction:\n {meal.get('strInstructions')}\n" \
+                 f"Area: {meal.get('strArea')}\n\n" \
+                 f"Ingredients: \n{ingredients_str}\n\n" \
+                 f"Instruction:\n {meal.get('strInstructions')}\n" \
                  f"{link}"
     return meal.get("strMealThumb"), reply_str
 
@@ -163,16 +163,20 @@ def ask_for(message: Message, ask_text: str,
 
 
 def check_range(range_str: str) -> bool | list:
+    # check 'number, number'
     if match := re.match(r'\d+,\s*\d+', range_str):
         start, end = re.split(r',\s*', match.group(0))
         start = int(start)
         end = int(end)
         if end < start:
             return False
+        if (start > 99) or (end <= 0) or (end > 99):
+            return False
         if match.group(0) != range_str:
             return False
         return list(range(start, end + 1))
 
+    # check 'number'
     if match := re.match(r'\d+', range_str):
         if match.group(0) != range_str:
             return False

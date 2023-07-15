@@ -40,7 +40,7 @@ def history_clean(user_id):
 
 
 def get_last_n_from_history(n: int, user_id: int) -> list[tuple] | None:
-    n = n + 2
+    n = n + 1
     db = history_interface
     values = db.read_all()
     
