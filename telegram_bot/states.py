@@ -10,13 +10,9 @@ bot.add_custom_filter(custom_filters.StateFilter(bot))
 
 class ConversationStates(StatesGroup):
     cancel = State()    # cancel (waiting),
-    ask_category = State()    # ask_category,
-    low_reply = State()    # low_reply,
-    high_reply = State()    # high_reply,
     wait_button = State()    # button_reply
     wait_range = State()    # custom command
     wait_random = State()    # wait for random
-    wait_search = State()    # wait for search type reply
     wait_name = State()    # wait for meal name
     wait_ingredients = State()    # wait for ingredients
     list_reply = State()    # ask for list type

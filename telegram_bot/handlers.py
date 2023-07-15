@@ -152,10 +152,8 @@ def button(call) -> None:
         last_command = get_last_n_from_history(1, msg.from_user.id)[0][1]
 
         if last_command == '/low':
-            set_user_state(msg, ConversationStates.low_reply)
             commands.low_reply(call)
         elif last_command == '/high':
-            set_user_state(msg, ConversationStates.high_reply)
             commands.high_reply(call)
 
     elif call.data == 'meals_list':

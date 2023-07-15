@@ -13,34 +13,26 @@ from database.core import history_interface
 
 """
 states:
-    0: cancel (waiting),
-    1: ask_category,
-    2: low_reply,
-    3: high_reply,
-    4: button_reply
-    5: wait for random
-    6: ask for list type
-    7: wait for range
+    cancel: cancel (waiting),
+    wait_button: button_reply
+    wait_range: custom command
+    wait_random: wait for random
+    wait_name: wait for meal name
+    wait_ingredients: wait for ingredients
+    list_reply: ask for list type
 """
 
 # used to have list of categories in handlers file
 CATEGORIES = api.get_list_by_key(Factors.categories)
 
-def ask_category(message) -> None:    #TODO change string to markup
+def ask_category(message) -> None:
     """Send message asking to input desired category"""
 
     last_command = get_last_n_from_history(1, message.from_user.id)[0][1]
 
     categories_str = ", ".join(CATEGORIES)
     reply_markup(message, 'Available categories:', CATEGORIES, CATEGORIES)
-    # bot.send_message(message.chat.id, f'Available categories:\n{categories_str}')
-    # bot.send_message(message.chat.id, 'Please enter the category name:')
-
-
-    if last_command == '/low':
-        set_user_state(message, ConversationStates.low_reply)
-    elif last_command == '/high':
-        set_user_state(message, ConversationStates.high_reply)
+    set_user_state(message, ConversationStates.wait_button)
 
 
 def category_not_found(message: Message) -> None:
@@ -86,12 +78,13 @@ def low_high_reply(call: CallbackQuery,
         category_not_found(message)
     else:
         category_meals_found(message, result)
-        set_user_state(message, ConversationStates.wait_button)
 
-def low_reply(call: CallbackQuery):
+
+def low_reply(call: CallbackQuery) -> None:
     low_high_reply(call)
 
-def high_reply(call: CallbackQuery):
+
+def high_reply(call: CallbackQuery) -> None:
     low_high_reply(call, func=api.high)
 
 
