@@ -102,16 +102,6 @@ def history(message: Message) -> None:
 
 # state handlers
 
-@bot.message_handler(state=ConversationStates.low_reply)
-def low_command_reply(message: Message) -> None:
-    commands.low_reply(message)
-
-
-@bot.message_handler(state=ConversationStates.high_reply)
-def high_command_reply(message: Message) -> None:
-    commands.high_reply(message)
-
-
 @bot.message_handler(state=ConversationStates.wait_range)
 def find_meals_range(message: Message):
     given_range = message.text
@@ -157,6 +147,16 @@ def button(call) -> None:
     elif call.data in {'areas', 'categories', 'ingredients'}:
         commands.set_user_state(msg, ConversationStates.list_reply)
         commands.list_reply(msg, commands.Factors.__dict__.get(call.data))
+
+    elif call.data in commands.CATEGORIES:
+        last_command = get_last_n_from_history(1, msg.from_user.id)[0][1]
+
+        if last_command == '/low':
+            set_user_state(msg, ConversationStates.low_reply)
+            commands.low_reply(call)
+        elif last_command == '/high':
+            set_user_state(msg, ConversationStates.high_reply)
+            commands.high_reply(call)
 
     elif call.data == 'meals_list':
         with bot.retrieve_data(uid, cid) as data:

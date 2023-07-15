@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from database.core import history_interface, History
+from database.core import history_interface
 
 
 @dataclass

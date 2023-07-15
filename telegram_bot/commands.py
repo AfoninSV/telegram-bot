@@ -3,7 +3,7 @@ from string import ascii_lowercase
 import re
 import json
 
-from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from telebot.types import Message,CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 
 from api_mealdb import api
 from loader import bot, storage
@@ -23,14 +23,18 @@ states:
     7: wait for range
 """
 
+# used to have list of categories in handlers file
+CATEGORIES = api.get_list_by_key(Factors.categories)
 
 def ask_category(message) -> None:    #TODO change string to markup
     """Send message asking to input desired category"""
 
     last_command = get_last_n_from_history(1, message.from_user.id)[0][1]
-    categories_str = ", ".join(api.get_list_by_key(Factors.categories))
-    bot.send_message(message.chat.id, f'Available categories:\n{categories_str}')
-    bot.send_message(message.chat.id, 'Please enter the category name:')
+
+    categories_str = ", ".join(CATEGORIES)
+    reply_markup(message, 'Available categories:', CATEGORIES, CATEGORIES)
+    # bot.send_message(message.chat.id, f'Available categories:\n{categories_str}')
+    # bot.send_message(message.chat.id, 'Please enter the category name:')
 
 
     if last_command == '/low':
@@ -43,7 +47,7 @@ def category_not_found(message: Message) -> None:
     """Sends message informing that looked database wasn't found and
     sends existed fields"""
 
-    categories_str = ", ".join(api.get_list_by_key(Factors.categories))
+    categories_str = ", ".join(CATEGORIES)
     bot.send_message(message.chat.id, f'Category not found, please see categories below: '
                                       f'\n\n{categories_str}')
     bot.send_message(message.chat.id, "Try again: ")
@@ -66,14 +70,16 @@ def category_meals_found(message: Message, result: list) -> int:
     set_user_state(message, ConversationStates.cancel)
 
 
-def low_high_reply(message: Message,
+def low_high_reply(call: CallbackQuery,
                    func=api.low) -> None:
     """Base function for low_reply, high_reply.
     Processes the user input for a category and searches based on the category name.
     Used for /low and /high commands."""
 
+    message = call.message
+
     bot.send_message(message.chat.id, 'Searching...')
-    category_name = message.text
+    category_name = call.data
     result = func(category_name)
 
     if result is None:
@@ -82,11 +88,11 @@ def low_high_reply(message: Message,
         category_meals_found(message, result)
         set_user_state(message, ConversationStates.wait_button)
 
-def low_reply(message: Message):
-    low_high_reply(message)
+def low_reply(call: CallbackQuery):
+    low_high_reply(call)
 
-def high_reply(message: Message):
-    low_high_reply(message, func=api.high)
+def high_reply(call: CallbackQuery):
+    low_high_reply(call, func=api.high)
 
 
 def cancel(message: Message) -> None:
