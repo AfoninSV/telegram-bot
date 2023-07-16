@@ -11,7 +11,6 @@ from utils.bot_commands import set_commands
 
 storage = StateMemoryStorage()
 token = api_settings.tg_token.get_secret_value()
-print(token)
 
 # Initialisations
 bot = telebot.TeleBot(token, state_storage=storage)
