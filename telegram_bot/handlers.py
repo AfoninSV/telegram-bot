@@ -4,7 +4,7 @@ from . import commands
 from .states import ConversationStates, get_user_state, set_user_state
 from utils.helpers import start_message, help_message, get_last_n_from_history
 from database.core import history_interface
-from loader import bot
+from _loader import bot
 
 
 @bot.message_handler(func=lambda message: 'hello' in message.text.lower())
