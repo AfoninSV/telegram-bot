@@ -13,7 +13,7 @@ token = api_settings.tg_token.get_secret_value()
 
 # Initialisations
 bot = telebot.TeleBot(token, state_storage=storage)
-server = Flask('main.py')
+server = Flask(__name__)
 
 
 @server.route('/' + token, methods=['POST'])
@@ -32,4 +32,3 @@ def webhook():
 
 
 set_commands(bot)
-server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
