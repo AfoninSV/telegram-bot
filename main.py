@@ -18,14 +18,14 @@ server = Flask(__name__)
 
 
 @server.route('/' + token, methods=['POST'])
-def get_message():
+def getMessage():
     json_string = request.stream.read().decode('utf-8')
     update = telebot.types.Update.de_json(json_string)
     bot.process_new_updates([update])
     return "!", 200
 
 
-@server.route("/", methods=['POST'])
+@server.route("/")
 def webhook():
     bot.remove_webhook()
     bot.set_webhook(url='https://tg-tasty-bot-2f2c1b337730.herokuapp.com/' + token)
