@@ -2,7 +2,7 @@ from telebot.handler_backends import State, StatesGroup
 from telebot.types import Message
 from telebot import custom_filters
 
-from loader import bot
+from _loader import bot
 
 
 bot.add_custom_filter(custom_filters.StateFilter(bot))

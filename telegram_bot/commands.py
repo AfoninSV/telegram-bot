@@ -6,7 +6,7 @@ import json
 from telebot.types import Message,CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 
 from api_mealdb import api
-from loader import bot, storage
+from _loader import bot, storage
 from utils.helpers import Factors, get_last_n_from_history
 from .states import ConversationStates, set_user_state
 from database.core import history_interface
