@@ -1,1 +1,1 @@
-web: gunicorn deploy:app
+web: python3 main.py $PORT
