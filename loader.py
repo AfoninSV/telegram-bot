@@ -13,7 +13,7 @@ token = api_settings.tg_token.get_secret_value()
 
 # Initialisations
 bot = telebot.TeleBot(token, state_storage=storage)
-server = Flask('main.py')
+server = Flask(__name__)
 
 
 @server.route('/' + token, methods=['POST'])
@@ -27,9 +27,8 @@ def get_message():
 @server.route("/")
 def webhook():
     bot.remove_webhook()
-    bot.set_webhook(url='https://www.heroku.com/pricing/estimates/10a196fdffb067183a041f4480e51e64d29c5e010cd192531b175d996886b46f' + token)
+    bot.set_webhook(url='https://tg-tasty-bot-2f2c1b337730.herokuapp.com/' + token)
     return "!", 200
 
 
 set_commands(bot)
-server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
