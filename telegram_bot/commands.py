@@ -262,15 +262,28 @@ def check_ingredinets_list(message: Message) -> list:
 def reply_search_by_ingredients(message: Message, ingredients_list: list):
     ingredients = ','.join(ingredients_list)
     meals: list = api.search_by_ingredients(ingredients)
+    if not meals:
+        bot.send_message(message.chat.id, "I couldn't find the exact ingredients list, "
+                                          "but you may want to try these meals that use similar ingredients...")
+        for index in range(len(ingredients_list)):
+            deleted_ingredient = ingredients_list.pop(index)
+
+            ingredients = ','.join(ingredients_list)
+            meals_to_try: list = api.search_by_ingredients(ingredients)
+
+            ingredients_list.insert(index, deleted_ingredient)
+            meals = meals or list()
+            meals += meals_to_try or list()
+        if not meals:
+            for ingredient in ingredients_list:
+                meals_to_try: list = api.search_by_ingredients(ingredient)
+                meals = meals or list()
+                meals += meals_to_try or list()
     if meals:
-        keyboard = InlineKeyboardMarkup()
-        for name, id in [(meal.get('strMeal'), meal.get('idMeal')) for meal in meals]:
-            keyboard.add(InlineKeyboardButton(name, callback_data=id))
-        bot.send_message(message.chat.id, 'Select which meal would you like to see:',
-                         reply_markup=keyboard)
+        reply_markup(message, 'Select which meal would you like to see:', meals_list=meals)
         set_user_state(message, ConversationStates.cancel)
-    else:
-        bot.send_message(message.chat.id, 'Nothing found, try again:')
+        return
+    bot.send_message(message.chat.id, 'Nothing found, try again:')
 
 def reply_markup(message, msg_to_ask: str,
                  button_text: list=None,
