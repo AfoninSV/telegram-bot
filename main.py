@@ -11,6 +11,7 @@ from utils.bot_commands import set_commands
 
 storage = StateMemoryStorage()
 token = api_settings.tg_token.get_secret_value()
+print(token)
 
 # Initialisations
 bot = telebot.TeleBot(token, state_storage=storage)
@@ -33,4 +34,5 @@ def webhook():
 
 
 set_commands(bot)
-server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+if __name__ == "__main__":
+    server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
