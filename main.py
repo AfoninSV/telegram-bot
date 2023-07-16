@@ -25,7 +25,7 @@ def get_message():
     return "!", 200
 
 
-@server.route("/")
+@server.route("/", methods=['POST'])
 def webhook():
     bot.remove_webhook()
     bot.set_webhook(url='https://tg-tasty-bot-2f2c1b337730.herokuapp.com/' + token)
