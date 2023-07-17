@@ -26,15 +26,13 @@ def getMessage():
     return f"{bot.get_webhook_info()}", 200
 
 
-# @server.route("/")
-# def webhook():
-#     bot.remove_webhook()
-#     bot.set_webhook(url='https://tg-tasty-bot-2f2c1b337730.herokuapp.com/' + token)
-#     return "!", 200
+@server.route("/")
+def webhook():
+    bot.remove_webhook()
+    if bot.set_webhook(url='https://tg-tasty-bot-2f2c1b337730.herokuapp.com/' + token):
+        return "!", 200
 
 
 set_commands(bot)
 if __name__ == "__main__":
-    bot.remove_webhook()
-    bot.set_webhook(url='https://tg-tasty-bot-2f2c1b337730.herokuapp.com/' + token + '/')
     server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
