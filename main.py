@@ -7,13 +7,13 @@ import os
 
 from telegram_bot import handlers
 from utils.bot_commands import set_commands
+from loader import bot
 
 
 storage = StateMemoryStorage()
 token = api_settings.tg_token.get_secret_value()
 
 # Initialisations
-bot = telebot.TeleBot(token, state_storage=storage)
 server = Flask(__name__)
 
 
