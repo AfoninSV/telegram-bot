@@ -22,6 +22,7 @@ def getMessage():
     json_string = request.stream.read().decode('utf-8')
     update = telebot.types.Update.de_json(json_string)
     bot.process_new_updates([update])
+    print(bot.get_webhook_info())
     return f"{bot.get_webhook_info()}", 200
 
 
