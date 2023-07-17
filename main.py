@@ -36,5 +36,5 @@ def getMessage():
 set_commands(bot)
 if __name__ == "__main__":
     bot.remove_webhook()
-    bot.set_webhook(url='https://tg-tasty-bot-2f2c1b337730.herokuapp.com/' + token)
+    bot.set_webhook(url='https://tg-tasty-bot-2f2c1b337730.herokuapp.com/' + token + '/')
     server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
