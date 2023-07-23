@@ -26,7 +26,7 @@ def getMessage():
 @server.route("/")
 def webhook():
     bot.remove_webhook()
-    if bot.set_webhook(url='https://tg-tasty-bot-2f2c1b337730.herokuapp.com/' + token):
+    if bot.set_webhook(url='https://tg-tasty-bot-2f2c1b337730.herokuapp.com/'):
         return "Webhook set up successfully!", 200
     else:
         return "Webhook setup failed!", 500
