@@ -57,6 +57,14 @@ def get_meals_by_category(category_name) -> list[dict]:
     return response
 
 
+def get_meal_by_area(area):
+    """Returns meals list by given area"""
+
+    querystring = {"a": area}
+    response: list[dict] = make_response("filter", params=querystring)
+    return response
+
+
 def get_meal_by_id(meal_id) -> dict:
     """Returns meal's description by id"""
 
