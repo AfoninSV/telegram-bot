@@ -24,6 +24,27 @@ states:
 
 # used to have list of categories in handlers file
 CATEGORIES = api.get_list_by_key(Factors.categories)
+AREAS = api.get_list_by_key(Factors.areas)
+
+
+def reply_markup(message, msg_to_ask: str,
+                 button_text: list=None,
+                 callback_data: list=None,
+                 meals_list=None) -> None:
+    """Sends message with keyboard markup with given data"""
+
+    keyboard = InlineKeyboardMarkup()
+    if meals_list:
+        button_text = list()
+        callback_data = list()
+        for meal in meals_list:
+            button_text.append(meal.get('strMeal'))
+            callback_data.append(meal.get('idMeal'))
+
+    for txt, id in zip(button_text, callback_data):
+        keyboard.add(InlineKeyboardButton(txt, callback_data=id))
+    bot.send_message(message.chat.id, msg_to_ask, reply_markup=keyboard)
+
 
 def ask_category(message) -> None:
     """Send message asking to input desired category"""
@@ -204,22 +225,23 @@ def random_recipe(message: Message) -> None:
 
 
 def ask_for_list(message: Message) -> None:
-    """Sends message asking for type of list and make buttons for reply"""
+    """Sends reply markup of [areas, categories, ingredients]"""
 
-    keyboard = InlineKeyboardMarkup()
-    for type in {'areas', 'categories', 'ingredients'}:
-        button = InlineKeyboardButton(text=type,
-                                      callback_data=type)
-        keyboard.add(button)
-
-    bot.send_message(message.chat.id, 'Please choose the type of desired list:', reply_markup=keyboard)
+    types = {'areas', 'categories', 'ingredients'}
+    reply_markup(message, 'Please choose the type of desired list:', types, types)
     set_user_state(message, ConversationStates.cancel)
 
 
 def list_reply(message: Message, factor: str) -> None:
     names_list = api.get_list_by_key(factor)
-    names_str = ", ".join(names_list)
-    if len(names_str) > 4096:
+    callback_names = [f"filter {name}"for name in names_list]
+    if factor == "a":
+        reply_markup(message, "Choose to see meals of that area:", names_list, callback_names)
+    elif factor == "c":
+        reply_markup(message, "Choose to see meals of that category:", names_list, callback_names)
+    elif factor == "i":
+        # if len(names_str) > 4096:
+        names_str = ", ".join(names_list)
         list_len = len(names_list)
         names_str_1 = ", ".join(names_list[:list_len // 2])
         names_str_2 = ", ".join(names_list[list_len // 2 + 1 :])
@@ -285,20 +307,12 @@ def reply_search_by_ingredients(message: Message, ingredients_list: list):
         return
     bot.send_message(message.chat.id, 'Nothing found, try again:')
 
-def reply_markup(message, msg_to_ask: str,
-                 button_text: list=None,
-                 callback_data: list=None,
-                 meals_list=None) -> None:
-    """Sends message with keyboard markup with given data"""
 
-    keyboard = InlineKeyboardMarkup()
-    if meals_list:
-        button_text = list()
-        callback_data = list()
-        for meal in meals_list:
-            button_text.append(meal.get('strMeal'))
-            callback_data.append(meal.get('idMeal'))
+def reply_categories(message: Message, category: str):
+    meals_list = api.get_meals_by_category(category)
+    reply_markup(message,"Meals found:", meals_list=meals_list)
 
-    for txt, id in zip(button_text, callback_data):
-        keyboard.add(InlineKeyboardButton(txt, callback_data=id))
-    bot.send_message(message.chat.id, msg_to_ask, reply_markup=keyboard)
+
+def reply_areas(message: Message, area: str):
+    meals_list = api.get_meal_by_area(area)
+    reply_markup(message,"Meals found:", meals_list=meals_list)

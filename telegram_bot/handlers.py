@@ -152,6 +152,14 @@ def button(call) -> None:
         commands.set_user_state(msg, ConversationStates.list_reply)
         commands.list_reply(msg, commands.Factors.__dict__.get(call.data))
 
+    elif "filter" in call.data:
+        call.data = call.data.split()[1]
+        if call.data in commands.AREAS:
+            commands.reply_areas(msg, call.data)
+
+        elif call.data in commands.CATEGORIES:
+            commands.reply_categories(msg, call.data)
+
     elif call.data in commands.CATEGORIES:
         last_command = get_last_n_from_history(1, msg.from_user.id)[0][1]
 
