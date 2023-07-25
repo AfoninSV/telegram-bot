@@ -25,6 +25,8 @@ states:
 # used to have list of categories in handlers file
 CATEGORIES = api.get_list_by_key(Factors.categories)
 AREAS = api.get_list_by_key(Factors.areas)
+INGREDIENS = [ingr for ingr in api.get_list_by_key(Factors.ingredients)
+              if api.search_by_ingredients(ingr)]
 
 
 def reply_markup(message, msg_to_ask: str,
@@ -241,7 +243,7 @@ def list_reply(message: Message, factor: str) -> None:
         reply_markup(message, "Choose to see meals of that category:", names_list, callback_names)
     elif factor == "i":
         # if len(names_str) > 4096:
-        names_str = ", ".join(names_list)
+        INGREDIENS = ", ".join(names_list)
         list_len = len(names_list)
         names_str_1 = ", ".join(names_list[:list_len // 2])
         names_str_2 = ", ".join(names_list[list_len // 2 + 1 :])
