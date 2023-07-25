@@ -57,8 +57,8 @@ def get_last_n_from_history(n: int, user_id: int) -> list[tuple] | None:
 start_message = """
 Welcome to the Telegram Recipe Bot!
 
-Our bot helps you discover various cooking recipes. 
-Whether you want something simple or more challenging, we've got you covered.
+Our bot helps you discover various cooking recipes, whether you want something simple or more challenging – we've got you covered.
+Type /help to see available options and their descriptions.
 
 Happy cooking!
 """
