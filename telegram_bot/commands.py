@@ -25,8 +25,12 @@ states:
 # used to have list of categories in handlers file
 CATEGORIES = api.get_list_by_key(Factors.categories)
 AREAS = api.get_list_by_key(Factors.areas)
-INGREDIENS = [ingr for ingr in api.get_list_by_key(Factors.ingredients)
-              if api.search_by_ingredients(ingr)]
+with open("ingredients.txt", "r") as f:
+    INGREDIENTS = f.read().split(", ")
+
+# Usied before deployed on server to update list (takes long time so separated from server)
+# INGREDIENS = [ingr for ingr in api.get_list_by_key(Factors.ingredients)
+#               if api.search_by_ingredients(ingr)]
 
 
 def reply_markup(message, msg_to_ask: str,
