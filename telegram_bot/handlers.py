@@ -1,9 +1,11 @@
 from telebot.types import Message
 
+import json
+
 from . import commands
 from .states import ConversationStates, get_user_state, set_user_state
 from utils.helpers import start_message, help_message, get_last_n_from_history
-from database.core import history_interface
+from database.core import history_interface, favorites_interface
 from loader import bot
 
 
@@ -92,6 +94,12 @@ def search_start(message: Message) -> None:
                           button_text=reply_data, callback_data=reply_data)
 
 
+@bot.message_handler(commands=['favorites'])
+def list_start(message: Message) -> None:
+    history_interface.insert(user_id=message.from_user.id, message='/favorites')
+    commands.show_favorites(message)
+
+
 @bot.message_handler(commands=['history'])
 def history(message: Message) -> None:
     history_reply = get_last_n_from_history(10, int(message.from_user.id))
@@ -160,6 +168,10 @@ def button(call) -> None:
         elif call.data in commands.CATEGORIES:
             commands.reply_categories(msg, call.data)
 
+    elif "favorites" in call.data:
+        data: str = call.data.split("|")[1]
+        commands.add_favorites(msg, data)
+
     elif call.data in commands.CATEGORIES:
         last_command = get_last_n_from_history(1, msg.from_user.id)[0][1]
 
@@ -167,11 +179,6 @@ def button(call) -> None:
             commands.low_reply(call)
         elif last_command == '/high':
             commands.high_reply(call)
-
-    elif call.data == 'meals_list':
-        with bot.retrieve_data(uid, cid) as data:
-            meals_list = data.get('meals_list')
-        commands.send_multiple_recipes(msg, meals_list)
 
     elif call.data == 'by name':
         commands.ask_for(msg, 'Please, write meal name to search:',
