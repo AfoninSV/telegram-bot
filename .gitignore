@@ -23,3 +23,8 @@ logs/
 
 # Binary files
 *.bin
+
+# temporary ifnored
+config_data/config.py
+loader.py
+main.py
