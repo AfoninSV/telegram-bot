@@ -9,7 +9,7 @@ from api_mealdb import api
 from loader import bot, storage
 from utils.helpers import Factors, get_last_n_from_history
 from .states import ConversationStates, set_user_state
-from database.core import history_interface
+from database.core import history_interface, fridge_interface, favorites_interface
 
 """
 states:
@@ -139,38 +139,28 @@ def get_recipe_str(meal_id: Optional[str]=None, meal:Optional[dict]=None) -> tup
                  f"Ingredients: \n{ingredients_str}\n\n" \
                  f"Instruction:\n {meal.get('strInstructions')}\n" \
                  f"{link}"
-    return meal.get("strMealThumb"), reply_str
+    # used as callback data for buttons to work with favorites list
+    favorites_data = {"id": meal.get('idMeal'), "title": meal.get('strMeal')}
+    return meal.get("strMealThumb"), reply_str, json.dumps(favorites_data)
 
 
-def send_recipe_str(recipe_picture: str, recipe_str: str, message: Message) -> None:
+def send_recipe_str(recipe_picture: str, recipe_str: str, favs_data: str, message: Message) -> None:
+    """
+    Sends provided recipe in structured way with "favorite" button
+    :param favs_data: '{"id":"meal id", "title": "meal title"}', json used
+    """
+
     bot.send_photo(message.chat.id, recipe_picture)
     if len(recipe_str) > 4096:
         recipe_str_1 = recipe_str[:recipe_str // 2]
         recipe_str_2 = recipe_str_1[recipe_str // 2 + 1:]
         bot.send_message(message.chat.id, recipe_str_1)
         bot.send_message(message.chat.id, recipe_str_2)
+
+        reply_markup(message, recipe_str_2, ["add to favorites"], [f"favorites|{favs_data}"])
     else:
         bot.send_message(message.chat.id, recipe_str)
-
-
-def send_multiple_recipes(message: Message, meals_list: list) -> None:
-    for i_meal, meal in enumerate(meals_list):
-        if i_meal >= 2:
-            set_user_state(message, ConversationStates.wait_button)
-            with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-                data['meals_list'] = meals_list
-
-            keyboard = InlineKeyboardMarkup()
-            keyboard.add(InlineKeyboardButton(text='Yes', callback_data='meals_list'))
-            keyboard.add(InlineKeyboardButton(text='Cancel', callback_data='cancel'))
-            bot.send_message(message.chat.id, 'Show more?', reply_markup=keyboard)
-
-
-            break
-        send_recipe_str(*get_recipe_str(meal=meal), message)
-        meals_list.pop(i_meal)
-    else:
-        set_user_state(message, ConversationStates.cancel)
+        reply_markup(message, recipe_str, ["add to favorites"], [f"favorites|{favs_data}"])
 
 
 def meal_id_button_get(call) -> None:
@@ -262,7 +252,8 @@ def list_reply(message: Message, factor: str) -> None:
 def find_by_name(message: Message, name: str) -> None:
     if meals := api.get_meal_by_name(name):
         if len(meals) == 1:
-            send_recipe_str(*get_recipe_str(meal=meals[0]), message)
+            meal = meals[0]
+            send_recipe_str(*get_recipe_str(meal=meal), message)
             set_user_state(message, ConversationStates.cancel)
         else:
             keyboard = InlineKeyboardMarkup()
@@ -322,3 +313,34 @@ def reply_categories(message: Message, category: str):
 def reply_areas(message: Message, area: str):
     meals_list = api.get_meal_by_area(area)
     reply_markup(message,"Meals found:", meals_list=meals_list)
+
+
+def show_favorites(message: Message):
+    uid = message.from_user.id
+    favs_str = favorites_interface.read_by("user_id", uid)
+    if favs_str:
+        ...
+        #reply_markup(message, "Your favorites:", [meal[1] for meal in favs_list])
+
+def add_favorites(message: Message, favorites_data: str):
+    uid = message.from_user.id
+    cid = message.chat.id
+    data = json.loads(favorites_data)
+
+    db_row = favorites_interface.read_by("user_id", uid)
+    if db_row:
+        saved_meals = json.loads(db_row["meals"])
+        if data["id"] not in [meal["id"] for meal in saved_meals]:
+            saved_meals.append(data)
+
+            json_data = json.dumps(saved_meals)
+            favorites_interface.update("meals", json_data, "user_id", uid)
+            bot.send_message(cid, f"Meal added to your list.")
+        else:
+            bot.send_message(cid, f"The meal is already in your list.")
+    else:
+        empty_list = []
+        empty_list.append(data  )
+        json_data = json.dumps(empty_list)
+        favorites_interface.insert(user_id=uid, meals=json_data, meals_id=data["id"])
+        bot.send_message(cid, f"Meal added to your list.")
