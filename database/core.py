@@ -2,7 +2,8 @@ from typing import Type, Union, Optional, Dict, Any
 
 from peewee import DoesNotExist
 
-from .models import db_history, db_meal, db_states, History, Meal, States
+from .models import (db_history, db_meal, db_fridge, db_favorites,
+                     History, Meal, Fridge, Favorites)
 
 
 db_history.connect()
@@ -10,6 +11,12 @@ db_history.create_tables([History])
 
 db_meal.connect()
 db_meal.create_tables([Meal])
+
+db_fridge.connect()
+db_fridge.create_tables([Fridge])
+
+db_favorites.connect()
+db_favorites.create_tables([Favorites])
 
 
 def is_exist(func_to_validate):
@@ -37,6 +44,7 @@ class DBInterface:
         with self._db.atomic():
             self._model.create(**kwargs)
 
+    @is_exist
     def update(self, column_name: str, value: Any, field_name: str, field_value: Any):
         with self._db.atomic():
             query = self._model.update({column_name: value}).where(
@@ -65,3 +73,5 @@ class DBInterface:
 
 history_interface = DBInterface(db_history, History)
 meal_interface = DBInterface(db_meal, Meal)
+fridge_interface = DBInterface(db_fridge, Fridge)
+favorites_interface = DBInterface(db_favorites, Favorites)

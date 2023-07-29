@@ -6,6 +6,8 @@ import peewee as pw
 db_history = pw.SqliteDatabase("history.db")
 db_meal = pw.SqliteDatabase("meal.db")
 db_states = pw.SqliteDatabase("states.db")
+db_fridge = pw.SqliteDatabase("fridge.db")
+db_favorites = pw.SqliteDatabase("favorites.db")
 
 
 class BaseModel(pw.Model):
@@ -47,3 +49,27 @@ class States(BaseModel):
 
     class Meta:
         database = db_states
+
+
+class Fridge(BaseModel):
+    """
+    Stores ingredients of user's fridge
+    """
+
+    user_id = pw.IntegerField()
+    ingredients = pw.TextField()
+
+    class Meta:
+        database = db_fridge
+
+
+class Favorites(BaseModel):
+    """
+    Stores user's saved meals id
+    """
+
+    user_id = pw.IntegerField()
+    meals = pw.TextField(null=False)
+
+    class Meta:
+        database = db_favorites
