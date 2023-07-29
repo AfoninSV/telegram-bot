@@ -4,6 +4,7 @@ from telebot.types import BotCommand
 DEFAULT_COMMANDS = (
     ("/start", "Welcome"),
     ("/help", "Options"),
+    ("/favorites", "Favorite meals"),
     ("/low", "Low ingredients"),
     ("/high", "Complex recipes"),
     ("/custom", "Specific ingredient range"),
