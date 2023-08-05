@@ -345,3 +345,25 @@ def add_favorites(message: Message, favorites_data: str):
         json_data = json.dumps(empty_list)
         favorites_interface.insert(user_id=uid, meals=json_data, meals_id=data["id"])
         bot.send_message(cid, f"Meal added to your list.")
+
+def is_favorite(message: Message, meal_id: Optional[str] = None, favs_data: Optional[str] = None) -> bool:
+    """
+    Check if given meal id is in favorite list or execute meal id from favs_data,
+    at least any should be filled or False is returned
+    """
+
+    uid = message.from_user.id
+    users_favs: dict = favorites_interface.read_by("user_id", uid)
+
+    if not meal_id:
+        if favs_data:
+            meal_id = json.loads(favs_data)["id"]
+        else:
+            return False
+
+    if users_favs:
+        fav_meals_id = [meal["id"] for meal in json.loads(users_favs["meals"])]
+
+    return meal_id in fav_meals_id
+
+
