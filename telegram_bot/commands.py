@@ -3,7 +3,12 @@ from string import ascii_lowercase
 import re
 import json
 
-from telebot.types import Message,CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from telebot.types import (
+    Message,
+    CallbackQuery,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+)
 
 from api_mealdb import api
 from loader import bot, storage
@@ -33,10 +38,13 @@ with open("ingredients.txt", "r") as f:
 #               if api.search_by_ingredients(ingr)]
 
 
-def reply_markup(message, msg_to_ask: str,
-                 button_text: list=None,
-                 callback_data: list=None,
-                 meals_list=None) -> None:
+def reply_markup(
+    message,
+    msg_to_ask: str,
+    button_text: list = None,
+    callback_data: list = None,
+    meals_list=None,
+) -> None:
     """Sends message with keyboard markup with given data"""
 
     keyboard = InlineKeyboardMarkup()
@@ -44,8 +52,8 @@ def reply_markup(message, msg_to_ask: str,
         button_text = list()
         callback_data = list()
         for meal in meals_list:
-            button_text.append(meal.get('strMeal'))
-            callback_data.append(meal.get('idMeal'))
+            button_text.append(meal.get("strMeal"))
+            callback_data.append(meal.get("idMeal"))
 
     for txt, id in zip(button_text, callback_data):
         keyboard.add(InlineKeyboardButton(txt, callback_data=id))
@@ -58,7 +66,7 @@ def ask_category(message) -> None:
     last_command = get_last_n_from_history(1, message.from_user.id)[0][1]
 
     categories_str = ", ".join(CATEGORIES)
-    reply_markup(message, 'Available categories:', CATEGORIES, CATEGORIES)
+    reply_markup(message, "Available categories:", CATEGORIES, CATEGORIES)
     set_user_state(message, ConversationStates.wait_button)
 
 
@@ -67,8 +75,10 @@ def category_not_found(message: Message) -> None:
     sends existed fields"""
 
     categories_str = ", ".join(CATEGORIES)
-    bot.send_message(message.chat.id, f'Category not found, please see categories below: '
-                                      f'\n\n{categories_str}')
+    bot.send_message(
+        message.chat.id,
+        f"Category not found, please see categories below: " f"\n\n{categories_str}",
+    )
     bot.send_message(message.chat.id, "Try again: ")
 
 
@@ -77,27 +87,29 @@ def category_meals_found(message: Message, result: list) -> int:
 
     keyboard = InlineKeyboardMarkup()
     for i_meal, meal in enumerate(result, start=1):
-        bot.send_photo(message.chat.id,
-                       f"{meal.get('strMealThumb')}\n",
-                       caption=f"{i_meal}: {meal['strMeal']}" \
-                               f"\n    {meal['ingredients_qty']} ingredients\n")
-        button = InlineKeyboardButton(text=i_meal,
-                                      callback_data=meal.get('idMeal'))
+        bot.send_photo(
+            message.chat.id,
+            f"{meal.get('strMealThumb')}\n",
+            caption=f"{i_meal}: {meal['strMeal']}"
+            f"\n    {meal['ingredients_qty']} ingredients\n",
+        )
+        button = InlineKeyboardButton(text=i_meal, callback_data=meal.get("idMeal"))
         keyboard.add(button)
 
-    bot.send_message(message.chat.id, "Please choose meal to get recipe:", reply_markup=keyboard)
+    bot.send_message(
+        message.chat.id, "Please choose meal to get recipe:", reply_markup=keyboard
+    )
     set_user_state(message, ConversationStates.cancel)
 
 
-def low_high_reply(call: CallbackQuery,
-                   func=api.low) -> None:
+def low_high_reply(call: CallbackQuery, func=api.low) -> None:
     """Base function for low_reply, high_reply.
     Processes the user input for a category and searches based on the category name.
     Used for /low and /high commands."""
 
     message = call.message
 
-    bot.send_message(message.chat.id, 'Searching...')
+    bot.send_message(message.chat.id, "Searching...")
     category_name = call.data
     result = func(category_name)
 
@@ -117,47 +129,67 @@ def high_reply(call: CallbackQuery) -> None:
 
 def cancel(message: Message) -> None:
     """Send notification that operation was canceled"""
-    bot.send_message(message.chat.id, 'Operation cancelled.')
+    bot.send_message(message.chat.id, "Operation cancelled.")
 
 
-def get_recipe_str(meal_id: Optional[str]=None, meal:Optional[dict]=None) -> tuple[str]:
+def get_recipe_str(
+    meal_id: Optional[str] = None, meal: Optional[dict] = None
+) -> tuple[str]:
     """Retrieves the recipe for a given meal ID and returns the recipe picture and text"""
 
     if meal_id:
         meal = api.get_meal_by_id(meal_id)
 
         ingredients_str = api.get_meal_ingredients(meal_id).strip()
-        link = meal.get('strYoutube')
+        link = meal.get("strYoutube")
     else:
-        ingredients_str = api.get_meal_ingredients(meal.get('idMeal')).strip()
-        link = meal.get('strYoutube')
+        ingredients_str = api.get_meal_ingredients(meal.get("idMeal")).strip()
+        link = meal.get("strYoutube")
 
     reply_str = str()
-    reply_str += f"Name: {meal.get('strMeal')}\n" \
-                 f"Category: {meal.get('strCategory')}\n" \
-                 f"Area: {meal.get('strArea')}\n\n" \
-                 f"Ingredients: \n{ingredients_str}\n\n" \
-                 f"Instruction:\n {meal.get('strInstructions')}\n" \
-                 f"{link}"
+    reply_str += (
+        f"Name: {meal.get('strMeal')}\n"
+        f"Category: {meal.get('strCategory')}\n"
+        f"Area: {meal.get('strArea')}\n\n"
+        f"Ingredients: \n{ingredients_str}\n\n"
+        f"Instruction:\n {meal.get('strInstructions')}\n"
+        f"{link}"
+    )
     # used as callback data for buttons to work with favorites list
-    favorites_data = {"id": meal.get('idMeal'), "title": meal.get('strMeal')}
+    favorites_data = {"id": meal.get("idMeal"), "title": meal.get("strMeal")}
     return meal.get("strMealThumb"), reply_str, json.dumps(favorites_data)
 
 
-def send_recipe_str(recipe_picture: str, recipe_str: str, favs_data: str, message: Message) -> None:
+def send_recipe_str(
+    recipe_picture: str, recipe_str: str, favs_data: str, message: Message
+) -> None:
     """
     Sends provided recipe in structured way with "favorite" button
     :param favs_data: '{"id":"meal id", "title": "meal title"}', json used
     """
 
     bot.send_photo(message.chat.id, recipe_picture)
-    if len(recipe_str) > 4096:
-        recipe_str_1 = recipe_str[:recipe_str // 2]
-        recipe_str_2 = recipe_str_1[recipe_str // 2 + 1:]
-        bot.send_message(message.chat.id, recipe_str_1)
-        reply_markup(message, recipe_str_2, ["add to favorites"], [f"favorites|{favs_data}"])
+    # check if string is longer that 4k symbols
+    if is_favorite(message, favs_data=favs_data):
+        if len(recipe_str) > 4096:  # TODO delete this and switch to telegra.ph
+            recipe_str_1 = recipe_str[: recipe_str // 2]
+            recipe_str_2 = recipe_str_1[recipe_str // 2 + 1 :]
+            bot.send_message(message.chat.id, recipe_str_1)
+            bot.send_message(message.chat.id, recipe_str_2)
+        else:
+            bot.send_message(message.chat.id, recipe_str)
     else:
-        reply_markup(message, recipe_str, ["add to favorites"], [f"favorites|{favs_data}"])
+        if len(recipe_str) > 4096:
+            recipe_str_1 = recipe_str[: recipe_str // 2]
+            recipe_str_2 = recipe_str_1[recipe_str // 2 + 1 :]
+            bot.send_message(message.chat.id, recipe_str_1)
+            reply_markup(
+                message, recipe_str_2, ["add to favorites"], [f"favorites|{favs_data}"]
+            )
+        else:
+            reply_markup(
+                message, recipe_str, ["add to favorites"], [f"favorites|{favs_data}"]
+            )
 
 
 def meal_id_button_get(call) -> None:
@@ -168,8 +200,9 @@ def meal_id_button_get(call) -> None:
     set_user_state(call.message, ConversationStates.cancel)
 
 
-def ask_for(message: Message, ask_text: str,
-            state: Optional[ConversationStates]=None) -> None:
+def ask_for(
+    message: Message, ask_text: str, state: Optional[ConversationStates] = None
+) -> None:
     bot.send_message(message.chat.id, ask_text)
 
     if state:
@@ -178,8 +211,8 @@ def ask_for(message: Message, ask_text: str,
 
 def check_range(range_str: str) -> bool | list:
     # check 'number, number'
-    if match := re.match(r'\d+,\s*\d+', range_str):
-        start, end = re.split(r',\s*', match.group(0))
+    if match := re.match(r"\d+,\s*\d+", range_str):
+        start, end = re.split(r",\s*", match.group(0))
         start = int(start)
         end = int(end)
         if end < start:
@@ -191,7 +224,7 @@ def check_range(range_str: str) -> bool | list:
         return list(range(start, end + 1))
 
     # check 'number'
-    if match := re.match(r'\d+', range_str):
+    if match := re.match(r"\d+", range_str):
         if match.group(0) != range_str:
             return False
         if (int(match.group(0)) > 99) or (int(match.group(0)) <= 0):
@@ -205,10 +238,9 @@ def check_all_for_qty(qty_range: list) -> list[dict]:
         meals: list = api.meals_by_first_letter(letter)
         if meals:
             for meal in meals:
-                if (qty := api.get_ingredients_qty(meal.get('idMeal'))) in qty_range:
+                if (qty := api.get_ingredients_qty(meal.get("idMeal"))) in qty_range:
                     fit.append(meal)
     return fit
-
 
 
 def random_recipe(message: Message) -> None:
@@ -220,23 +252,27 @@ def random_recipe(message: Message) -> None:
 def ask_for_list(message: Message) -> None:
     """Sends reply markup of [areas, categories, ingredients]"""
 
-    types = {'areas', 'categories', 'ingredients'}
-    reply_markup(message, 'Please choose the type of desired list:', types, types)
+    types = {"areas", "categories", "ingredients"}
+    reply_markup(message, "Please choose the type of desired list:", types, types)
     set_user_state(message, ConversationStates.cancel)
 
 
 def list_reply(message: Message, factor: str) -> None:
     names_list = api.get_list_by_key(factor)
-    callback_names = [f"filter {name}"for name in names_list]
+    callback_names = [f"filter {name}" for name in names_list]
     if factor == "a":
-        reply_markup(message, "Choose to see meals of that area:", names_list, callback_names)
+        reply_markup(
+            message, "Choose to see meals of that area:", names_list, callback_names
+        )
     elif factor == "c":
-        reply_markup(message, "Choose to see meals of that category:", names_list, callback_names)
+        reply_markup(
+            message, "Choose to see meals of that category:", names_list, callback_names
+        )
     elif factor == "i":
         # if len(names_str) > 4096:
         INGREDIENS = ", ".join(names_list)
         list_len = len(names_list)
-        names_str_1 = ", ".join(names_list[:list_len // 2])
+        names_str_1 = ", ".join(names_list[: list_len // 2])
         names_str_2 = ", ".join(names_list[list_len // 2 + 1 :])
 
         bot.send_message(message.chat.id, names_str_1)
@@ -255,36 +291,43 @@ def find_by_name(message: Message, name: str) -> None:
         else:
             keyboard = InlineKeyboardMarkup()
             for meal in meals:
-                meal_name = meal.get('strMeal')
-                meal_id = meal.get('idMeal')
+                meal_name = meal.get("strMeal")
+                meal_id = meal.get("idMeal")
                 keyboard.add(InlineKeyboardButton(meal_name, callback_data=meal_id))
-            bot.send_message(message.chat.id, 'Chose meal you want to see:', reply_markup=keyboard)
+            bot.send_message(
+                message.chat.id, "Chose meal you want to see:", reply_markup=keyboard
+            )
 
     else:
-        bot.send_message(message.chat.id, 'Nothing found, try again:')
+        bot.send_message(message.chat.id, "Nothing found, try again:")
 
 
 def check_ingredinets_list(message: Message) -> list:
     """Turns string list divided by commas with list of words,
-    whitespaces are changed with _ """
+    whitespaces are changed with _"""
 
     ingredients_string = message.text.strip()
-    ingredients_list = re.split(r',\s*', ingredients_string.lower())
-    ingredients_list = [re.sub(r'\s+', '_', name) if re.search(r'\s+', name) else name
-                        for name in ingredients_list]
+    ingredients_list = re.split(r",\s*", ingredients_string.lower())
+    ingredients_list = [
+        re.sub(r"\s+", "_", name) if re.search(r"\s+", name) else name
+        for name in ingredients_list
+    ]
     return ingredients_list
 
 
 def reply_search_by_ingredients(message: Message, ingredients_list: list):
-    ingredients = ','.join(ingredients_list)
+    ingredients = ",".join(ingredients_list)
     meals: list = api.search_by_ingredients(ingredients)
     if not meals:
-        bot.send_message(message.chat.id, "I couldn't find the exact ingredients list, "
-                                          "but you may want to try these meals that use similar ingredients...")
+        bot.send_message(
+            message.chat.id,
+            "I couldn't find the exact ingredients list, "
+            "but you may want to try these meals that use similar ingredients...",
+        )
         for index in range(len(ingredients_list)):
             deleted_ingredient = ingredients_list.pop(index)
 
-            ingredients = ','.join(ingredients_list)
+            ingredients = ",".join(ingredients_list)
             meals_to_try: list = api.search_by_ingredients(ingredients)
 
             ingredients_list.insert(index, deleted_ingredient)
@@ -296,20 +339,22 @@ def reply_search_by_ingredients(message: Message, ingredients_list: list):
                 meals = meals or list()
                 meals += meals_to_try or list()
     if meals:
-        reply_markup(message, 'Select which meal would you like to see:', meals_list=meals)
+        reply_markup(
+            message, "Select which meal would you like to see:", meals_list=meals
+        )
         set_user_state(message, ConversationStates.cancel)
         return
-    bot.send_message(message.chat.id, 'Nothing found, try again:')
+    bot.send_message(message.chat.id, "Nothing found, try again:")
 
 
 def reply_categories(message: Message, category: str):
     meals_list = api.get_meals_by_category(category)
-    reply_markup(message,"Meals found:", meals_list=meals_list)
+    reply_markup(message, "Meals found:", meals_list=meals_list)
 
 
 def reply_areas(message: Message, area: str):
     meals_list = api.get_meal_by_area(area)
-    reply_markup(message,"Meals found:", meals_list=meals_list)
+    reply_markup(message, "Meals found:", meals_list=meals_list)
 
 
 def show_favorites(message: Message):
@@ -322,6 +367,7 @@ def show_favorites(message: Message):
         reply_markup(message, "Your favorites:", meals_names, callback_data)
     else:
         bot.send_message(message.chat.id, "Your favorites list is empty")
+
 
 def add_favorites(message: Message, favorites_data: str):
     uid: int = message.from_user.id
@@ -341,12 +387,15 @@ def add_favorites(message: Message, favorites_data: str):
             bot.send_message(cid, f"The meal is already in your list.")
     else:
         empty_list = []
-        empty_list.append(data  )
+        empty_list.append(data)
         json_data = json.dumps(empty_list)
         favorites_interface.insert(user_id=uid, meals=json_data, meals_id=data["id"])
         bot.send_message(cid, f"Meal added to your list.")
 
-def is_favorite(message: Message, meal_id: Optional[str] = None, favs_data: Optional[str] = None) -> bool:
+
+def is_favorite(
+    message: Message, meal_id: Optional[str] = None, favs_data: Optional[str] = None
+) -> bool:
     """
     Check if given meal id is in favorite list or execute meal id from favs_data,
     at least any should be filled or False is returned
@@ -365,5 +414,3 @@ def is_favorite(message: Message, meal_id: Optional[str] = None, favs_data: Opti
         fav_meals_id = [meal["id"] for meal in json.loads(users_favs["meals"])]
 
     return meal_id in fav_meals_id
-
-
