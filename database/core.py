@@ -2,8 +2,16 @@ from typing import Type, Union, Optional, Dict, Any
 
 from peewee import DoesNotExist
 
-from .models import (db_history, db_meal, db_fridge, db_favorites,
-                     History, Meal, Fridge, Favorites)
+from .models import (
+    db_history,
+    db_meal,
+    db_fridge,
+    db_favorites,
+    History,
+    Meal,
+    Fridge,
+    Favorites,
+)
 
 
 db_history.connect()
@@ -21,22 +29,26 @@ db_favorites.create_tables([Favorites])
 
 def is_exist(func_to_validate):
     """Validates if value exists in database"""
-    def wrapped_func(*args, **kwargs):
 
+    def wrapped_func(*args, **kwargs):
         try:
             result = func_to_validate(*args, **kwargs)
         except DoesNotExist:
             return False
 
         return result
+
     return wrapped_func
 
 
 class DBInterface:
     """CRUD interface for databases"""
 
-    def __init__(self, db_instance: Union[db_history, db_meal],
-                 db_model: Type[History] | Type[Meal]):
+    def __init__(
+        self,
+        db_instance: Union[db_history, db_meal],
+        db_model: Type[History] | Type[Meal],
+    ):
         self._db = db_instance
         self._model = db_model
 
@@ -45,10 +57,12 @@ class DBInterface:
             self._model.create(**kwargs)
 
     @is_exist
-    def update(self, column_name: str, value: Any, field_name: str, field_value: Any):
+    def update(self, column_name: str, value: Any,
+               where_field_name: str, where_field_value: Any) -> None:
+
         with self._db.atomic():
             query = self._model.update({column_name: value}).where(
-                getattr(self._model, field_name) == field_value
+                getattr(self._model, where_field_name) == where_field_value
             )
             query.execute()
 
