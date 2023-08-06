@@ -177,14 +177,15 @@ def send_recipe_str(
     bot.send_photo(message.chat.id, recipe_picture)
     # check if string is longer that 4k symbols
     if is_favorite(message, favs_data=favs_data):
+        favs_data = json.loads(favs_data)
         if len(recipe_str) > 4096:  # TODO delete this and switch to telegra.ph
             recipe_str_1 = recipe_str[: recipe_str // 2]
             recipe_str_2 = recipe_str_1[recipe_str // 2 + 1 :]
             bot.send_message(message.chat.id, recipe_str_1)
-            reply_markup(message, recipe_str_2, ["remove"], [f"delete|{favs_data}"])
+            reply_markup(message, recipe_str_2, ["remove"], [f"delete|{favs_data['id']}"])
         else:
             #bot.send_message(message.chat.id, recipe_str)
-            reply_markup(message, recipe_str, ["remove"], [f"delete|{favs_data}"])
+            reply_markup(message, recipe_str, ["remove"], [f"delete|{favs_data['id']}"])
     else:
         if len(recipe_str) > 4096:
             recipe_str_1 = recipe_str[: recipe_str // 2]
@@ -356,9 +357,9 @@ def reply_areas(message: Message, area: str) -> None:
 
 def show_favorites(message: Message):
     uid = message.from_user.id
-    favs_data = favorites_interface.read_by("user_id", uid)
-    if favs_data:
-        favs_meals: list[dict] = json.loads(favs_data["meals"])
+    db_row: dict = favorites_interface.read_by("user_id", uid)
+    if db_row:
+        favs_meals: list[dict] = json.loads(db_row["meals"])
         callback_data = [meal["id"] for meal in favs_meals]
         meals_names = [meal["title"] for meal in favs_meals]
         reply_markup(message, "Your favorites:", meals_names, callback_data)
@@ -392,10 +393,9 @@ def add_favorites(message: Message, favorites_data: str):
         bot.send_message(cid, f"Meal was added to your list.")
 
 
-def delete_favorite(message: Message, favs_data: str) -> None:
+def delete_favorite(message: Message, meal_id: str) -> None:
     uid = message.from_user.id
     cid: int = message.chat.id
-    meal_id = json.loads(favs_data)["id"]
 
     # get user's data from favorites db
     db_row: dict = favorites_interface.read_by("user_id", uid)
