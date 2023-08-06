@@ -32,7 +32,7 @@ def history_clean(user_id):
     db = history_interface
     values = db.read_all()
     sorted_values = [row for row in values if row.user_id == user_id]
-    
+
     if len(sorted_values) > 20:
         records_to_delete = sorted_values[:-20]
         for record in records_to_delete:
@@ -43,8 +43,10 @@ def get_last_n_from_history(n: int, user_id: int) -> list[tuple] | None:
     n = n + 1
     db = history_interface
     values = db.read_all()
-    
-    sorted_values = [(row.date_time, row.message) for row in values if row.user_id == user_id]
+
+    sorted_values = [
+        (row.date_time, row.message) for row in values if row.user_id == user_id
+    ]
     history_clean(user_id)
 
     if sorted_values:

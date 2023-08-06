@@ -12,7 +12,7 @@ DEFAULT_COMMANDS = (
     ("/search", "By ingredient or name"),
     ("/list", "Categories, areas, or ingredients"),
     ("/history", "Last ten queries"),
-    ("/cancel", "Cancel operation")
+    ("/cancel", "Cancel operation"),
 )
 
 
