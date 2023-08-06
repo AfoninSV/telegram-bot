@@ -1,5 +1,6 @@
 from typing import Optional
 from string import ascii_lowercase
+from itertools import combinations
 import re
 import json
 
@@ -304,7 +305,7 @@ def find_by_name(message: Message, name: str) -> None:
         bot.send_message(message.chat.id, "Nothing found, try again:")
 
 
-def check_ingredinets_list(message: Message) -> list:
+def check_ingredients_list(message: Message) -> list:
     """Turns string list divided by commas with list of words,
     whitespaces are changed with _"""
 
@@ -326,20 +327,14 @@ def reply_search_by_ingredients(message: Message, ingredients_list: list):
             "I couldn't find the exact ingredients list, "
             "but you may want to try these meals that use similar ingredients...",
         )
-        for index in range(len(ingredients_list)):
-            deleted_ingredient = ingredients_list.pop(index)
-
-            ingredients = ",".join(ingredients_list)
-            meals_to_try: list = api.search_by_ingredients(ingredients)
-
-            ingredients_list.insert(index, deleted_ingredient)
-            meals = meals or list()
-            meals += meals_to_try or list()
-        if not meals:
-            for ingredient in ingredients_list:
-                meals_to_try: list = api.search_by_ingredients(ingredient)
-                meals = meals or list()
+        meals = list()
+        for minusable in range(1, len(ingredients_list)):
+            for ingredients_list_tmp in combinations(ingredients_list, len(ingredients_list) - minusable):
+                ingredients = ",".join(ingredients_list_tmp)
+                meals_to_try: list = api.search_by_ingredients(ingredients)
                 meals += meals_to_try or list()
+                if len(meals) >= 3:
+                    break
     if meals:
         reply_markup(
             message, "Select which meal would you like to see:", meals_list=meals
