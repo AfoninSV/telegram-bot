@@ -27,13 +27,18 @@ states:
     list_reply: ask for list type
 """
 
+# TODO move everything not used in handlers to separate file!
+#
+
 # used to have list of categories in handlers file
 CATEGORIES = api.get_list_by_key(Factors.categories)
 AREAS = api.get_list_by_key(Factors.areas)
 with open("ingredients.txt", "r") as f:
     INGREDIENTS = f.read().split(", ")
 
-# Usied before deployed on server to update list (takes long time so separated from server)
+# TODO change the way ingredients are saved (.txt file? cmon)
+
+# Used before deployed on server to update list (takes long time so separated from server)
 # INGREDIENS = [ingr for ingr in api.get_list_by_key(Factors.ingredients)
 #               if api.search_by_ingredients(ingr)]
 
@@ -175,21 +180,18 @@ def send_recipe_str(
             recipe_str_1 = recipe_str[: recipe_str // 2]
             recipe_str_2 = recipe_str_1[recipe_str // 2 + 1 :]
             bot.send_message(message.chat.id, recipe_str_1)
-            bot.send_message(message.chat.id, recipe_str_2)
+            reply_markup(message, recipe_str_2, ["remove"], [f"delete|{favs_data}"])
         else:
-            bot.send_message(message.chat.id, recipe_str)
+            #bot.send_message(message.chat.id, recipe_str)
+            reply_markup(message, recipe_str, ["remove"], [f"delete|{favs_data}"])
     else:
         if len(recipe_str) > 4096:
             recipe_str_1 = recipe_str[: recipe_str // 2]
             recipe_str_2 = recipe_str_1[recipe_str // 2 + 1 :]
             bot.send_message(message.chat.id, recipe_str_1)
-            reply_markup(
-                message, recipe_str_2, ["add to favorites"], [f"favorites|{favs_data}"]
-            )
+            reply_markup(message, recipe_str_2, ["add to favorites"], [f"add|{favs_data}"])
         else:
-            reply_markup(
-                message, recipe_str, ["add to favorites"], [f"favorites|{favs_data}"]
-            )
+            reply_markup(message, recipe_str, ["add to favorites"], [f"add|{favs_data}"])
 
 
 def meal_id_button_get(call) -> None:
@@ -347,12 +349,12 @@ def reply_search_by_ingredients(message: Message, ingredients_list: list):
     bot.send_message(message.chat.id, "Nothing found, try again:")
 
 
-def reply_categories(message: Message, category: str):
+def reply_categories(message: Message, category: str) -> None:
     meals_list = api.get_meals_by_category(category)
     reply_markup(message, "Meals found:", meals_list=meals_list)
 
 
-def reply_areas(message: Message, area: str):
+def reply_areas(message: Message, area: str) -> None:
     meals_list = api.get_meal_by_area(area)
     reply_markup(message, "Meals found:", meals_list=meals_list)
 
@@ -370,6 +372,8 @@ def show_favorites(message: Message):
 
 
 def add_favorites(message: Message, favorites_data: str):
+    """Adds meal id and title to user's db"""
+
     uid: int = message.from_user.id
     cid: int = message.chat.id
     data: dict = json.loads(favorites_data)
@@ -382,7 +386,7 @@ def add_favorites(message: Message, favorites_data: str):
 
             json_data: str = json.dumps(saved_meals)
             favorites_interface.update("meals", json_data, "user_id", uid)
-            bot.send_message(cid, f"Meal added to your list.")
+            bot.send_message(cid, f"Meal was added to your list.")
         else:
             bot.send_message(cid, f"The meal is already in your list.")
     else:
@@ -390,7 +394,31 @@ def add_favorites(message: Message, favorites_data: str):
         empty_list.append(data)
         json_data = json.dumps(empty_list)
         favorites_interface.insert(user_id=uid, meals=json_data, meals_id=data["id"])
-        bot.send_message(cid, f"Meal added to your list.")
+        bot.send_message(cid, f"Meal was added to your list.")
+
+
+def delete_favorite(message: Message, favs_data: str) -> None:
+    uid = message.from_user.id
+    cid: int = message.chat.id
+    meal_id = json.loads(favs_data)["id"]
+
+    # get user's data from favorites db
+    db_row: dict = favorites_interface.read_by("user_id", uid)
+    # get list of saved meals from db_row
+    saved_meals: str = db_row["meals"]
+    # deserializing saved meals list
+    saved_meals: list[dict] = json.loads(saved_meals)
+    meal_index: int = [i_meal
+                       for i_meal, meal in enumerate(saved_meals)
+                       if meal["id"] == meal_id][0]
+
+    # remove meal from saved list
+    saved_meals.pop(meal_index)
+    # replase saved list with one in db
+    favorites_interface.update("meals", json.dumps(saved_meals), "user_id", uid)
+
+    bot.send_message(cid, "Meal was removed from your list")
+
 
 
 def is_favorite(
@@ -410,7 +438,6 @@ def is_favorite(
         else:
             return False
 
-    if users_favs:
-        fav_meals_id = [meal["id"] for meal in json.loads(users_favs["meals"])]
+    fav_meals_id = [meal["id"] for meal in json.loads(users_favs["meals"])]
 
     return meal_id in fav_meals_id
