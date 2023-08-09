@@ -3,6 +3,7 @@ from datetime import datetime
 import peewee as pw
 
 
+db_user = pw.SqliteDatabase("user.db")
 db_history = pw.SqliteDatabase("history.db")
 db_meal = pw.SqliteDatabase("meal.db")
 db_states = pw.SqliteDatabase("states.db")
@@ -12,17 +13,15 @@ db_favorites = pw.SqliteDatabase("favorites.db")
 
 class BaseModel(pw.Model):
     id_key = pw.AutoField()
-    date_time = pw.DateTimeField(default=datetime.now().strftime("%d-%m-%y %H:%M:%S"))
 
 
-class History(BaseModel):
-    """Stores user commands call history"""
+class User(BaseModel):
+    """Stores user data"""
 
-    user_id = pw.IntegerField()
-    message = pw.TextField()
+    user_id = pw.TextField()
 
     class Meta:
-        database = db_history
+        database = db_user
 
 
 class Meal(BaseModel):
@@ -32,11 +31,24 @@ class Meal(BaseModel):
     """
 
     meal_id = pw.TextField()
+    title = pw.TextField()
     ingredients = pw.TextField()
     ingredients_qty = pw.IntegerField(null=True)
 
     class Meta:
         database = db_meal
+
+
+class Favorites(BaseModel):
+    """
+    Stores user - meal relations as favorites
+    """
+
+    user = pw.ForeignKeyField(User, backref="favorites")
+    meal = pw.ForeignKeyField(Meal, backref="favorites")
+
+    class Meta:
+        database = db_favorites
 
 
 class States(BaseModel):
@@ -51,6 +63,16 @@ class States(BaseModel):
         database = db_states
 
 
+class History(BaseModel):
+    """Stores user commands call history"""
+
+    user_id = pw.IntegerField()
+    message = pw.TextField()
+
+    class Meta:
+        database = db_history
+
+
 class Fridge(BaseModel):
     """
     Stores ingredients of user's fridge
@@ -61,15 +83,3 @@ class Fridge(BaseModel):
 
     class Meta:
         database = db_fridge
-
-
-class Favorites(BaseModel):
-    """
-    Stores user's saved meals id
-    """
-
-    user_id = pw.IntegerField()
-    meals = pw.TextField(null=False)
-
-    class Meta:
-        database = db_favorites
