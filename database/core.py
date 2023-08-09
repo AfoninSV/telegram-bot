@@ -3,16 +3,20 @@ from typing import Type, Union, Optional, Dict, Any
 from peewee import DoesNotExist
 
 from .models import (
+    db_user,
     db_history,
     db_meal,
     db_fridge,
     db_favorites,
+    User,
     History,
     Meal,
     Fridge,
     Favorites,
 )
 
+db_user.connect()
+db_user.create_tables([User])
 
 db_history.connect()
 db_history.create_tables([History])
@@ -52,6 +56,10 @@ class DBInterface:
         self._db = db_instance
         self._model = db_model
 
+    @property
+    def model(self):
+        return self._model
+
     def insert(self, **kwargs) -> None:
         with self._db.atomic():
             self._model.create(**kwargs)
@@ -72,10 +80,13 @@ class DBInterface:
         return values
 
     @is_exist
-    def read_by(self, field_name: str, field_value: str) -> Optional[Dict]:
+    def read_by(self, field_name: str, field_value: str, as_dict=True) -> Optional[Dict]:
         with self._db.atomic():
             record = self._model.get(**{field_name: field_value})
-            return record.__data__
+
+            if as_dict:
+                return record.__data__
+            return record
 
     @is_exist
     def delete(self, record_id: int) -> bool:
@@ -85,6 +96,7 @@ class DBInterface:
             return True
 
 
+user_interface = DBInterface(db_user, User)
 history_interface = DBInterface(db_history, History)
 meal_interface = DBInterface(db_meal, Meal)
 fridge_interface = DBInterface(db_fridge, Fridge)
