@@ -40,7 +40,7 @@ class Favorites(BaseModel):
     meal = pw.ForeignKeyField(Meal, backref="favorites")
 
 
-class History:
+class History(pw.Model):
     """Stores user commands call history"""
 
     id = pw.AutoField()

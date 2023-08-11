@@ -1,34 +1,21 @@
-from typing import Type, Union, Optional, Dict, Any
+from typing import Type, Optional, Dict, Any
 
-from peewee import DoesNotExist
+from peewee import DoesNotExist, Model
 
 from .models import (
-    db_user,
+    db,
     db_history,
-    db_meal,
-    db_fridge,
-    db_favorites,
     User,
-    History,
     Meal,
-    Fridge,
     Favorites,
+    History,
 )
 
-db_user.connect()
-db_user.create_tables([User])
+db.connect()
+db.create_tables([User, Meal, Favorites])
 
 db_history.connect()
 db_history.create_tables([History])
-
-db_meal.connect()
-db_meal.create_tables([Meal])
-
-db_fridge.connect()
-db_fridge.create_tables([Fridge])
-
-db_favorites.connect()
-db_favorites.create_tables([Favorites])
 
 
 def is_exist(func_to_validate):
@@ -50,54 +37,52 @@ class DBInterface:
 
     def __init__(
         self,
-        db_instance: Union[db_history, db_meal],
-        db_model: Type[History] | Type[Meal],
+        db_instance,
+        db_models: list[Type[Model]],
     ):
         self._db = db_instance
-        self._model = db_model
+        self._models = {str(model).split(":")[1][1:-1]: model for model in db_models}
 
-    @property
-    def model(self):
-        return self._model
+    def model(self, source_model_name: str):
+        return self._models[source_model_name]
 
-    def insert(self, **kwargs) -> None:
+    def insert(self, source_model_name: str, **kwargs) -> None:
         with self._db.atomic():
-            self._model.create(**kwargs)
+            self._models[source_model_name].create(**kwargs)
 
     @is_exist
-    def update(self, column_name: str, value: Any,
+    def update(self, source_model_name: str,
+               column_name: str, value: Any,
                where_field_name: str, where_field_value: Any) -> None:
 
         with self._db.atomic():
-            query = self._model.update({column_name: value}).where(
-                getattr(self._model, where_field_name) == where_field_value
+            query = self._models[source_model_name].update({column_name: value}).where(
+                getattr(self._models[source_model_name], where_field_name) == where_field_value
             )
             query.execute()
 
-    def read_all(self):
+    def read_all(self, source_model_name: str):
         with self._db.atomic():
-            values = self._model.select()
+            values = self._models[source_model_name].select()
         return values
 
     @is_exist
-    def read_by(self, field_name: str, field_value: str, as_dict=True) -> Optional[Dict]:
+    def read_by(self, source_model_name: str,
+                field_name: str, field_value: str, as_dict=True) -> Optional[Dict]:
         with self._db.atomic():
-            record = self._model.get(**{field_name: field_value})
+            record = self._models[source_model_name].get(**{field_name: field_value})
 
             if as_dict:
                 return record.__data__
             return record
 
     @is_exist
-    def delete(self, record_id: int) -> bool:
+    def delete(self, source_model_name: str,  record_id: int) -> bool:
         with self._db.atomic():
-            record = self._model.get_by_id(str(record_id))
+            record = self._models[source_model_name].get_by_id(str(record_id))
             record.delete_instance()
             return True
 
 
-user_interface = DBInterface(db_user, User)
-history_interface = DBInterface(db_history, History)
-meal_interface = DBInterface(db_meal, Meal)
-fridge_interface = DBInterface(db_fridge, Fridge)
-favorites_interface = DBInterface(db_favorites, Favorites)
+db_interface = DBInterface(db, [User, Meal, Favorites])
+history_interface = DBInterface(db_history, [History])
