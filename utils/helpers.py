@@ -57,24 +57,27 @@ def get_last_n_from_history(n: int, user_id: int) -> list[tuple] | None:
 
 
 start_message = """
-Welcome to the Telegram Recipe Bot!
+Hey hey, welcome to the Telegram Recipe Bot!
 
-Our bot helps you discover various cooking recipes, whether you want something simple or more challenging – we've got you covered.
-Type /help to see available options and their descriptions.
+I'm here to assist you in discovering cooking recipes, whether you're after simple dishes or a culinary journey – I'm here for you. 
+Just type /help to see the available options and what they're all about.
 
-Happy cooking!
+Have a blast cooking up a storm!
 """
 
 
 help_message = """
-Here are the core commands our bot supports:
+Here are the core commands:
 
-- /low: Find easy recipes based on the number of ingredients. Specify a dish type (e.g., "dessert" or "main course") to get simple recipes in that category.
-- /high: Get complex recipes with more ingredients. Test your skills with these challenging dishes.
-- /custom: Specify a range of ingredients, and the bot will find recipes within that range.
-- /random: Discover new recipes with a random suggestion.
-- /search: Find recipes that include a specific ingredient or by name.
-- /list: Get a list of all categories, areas, or ingredients.
-- /history: See your last ten queries.
-- /cancel: Cancel actual operation (or just use another command).
+- /low: Search for easy recipes based on ingredient count.
+- /high: Challenge yourself with complex recipes having more ingredients.
+- /custom: Set a range of ingredients, and I will find recipes within that range.
+- /random: Explore fresh recipes with a random suggestion.
+- /search: Find recipes by a specific ingredient or name.
+- /list: Get a list of categories, areas, or ingredients.
+- /favorites: Check out your saved recipes.
+- /history: Review your last ten queries.
+- /cancel: Stop ongoing operations (or just use another command).
+
+Feel free to give these commands a try and have fun in your cooking adventures! 
 """
