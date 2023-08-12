@@ -3,7 +3,6 @@ import peewee as pw
 
 db = pw.SqliteDatabase("database.db")  # for User, Meal, Favorites
 db_history = pw.SqliteDatabase("history.db")
-db_states = pw.SqliteDatabase("states.db")
 
 
 class BaseModel(pw.Model):
