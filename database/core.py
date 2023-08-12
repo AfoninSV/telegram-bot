@@ -68,12 +68,19 @@ class DBInterface:
 
     @is_exist
     def read_by(self, source_model_name: str,
-                field_name: str, field_value: str, as_dict=True) -> Optional[Dict]:
+                field_name: str, field_value: str, as_dict=True, **kwargs) -> Optional[Dict]:
+        # todo change as_dict to False
         with self._db.atomic():
-            record = self._models[source_model_name].get(**{field_name: field_value})
+            record = self._models[source_model_name].get(**{field_name: field_value}, **kwargs)
 
             if as_dict:
                 return record.__data__
+            return record
+
+    @is_exist
+    def read_by_multi(self, source_model_name: str, **kwargs) -> Optional[Dict]:
+        with self._db.atomic():
+            record = self._models[source_model_name].get(**kwargs)
             return record
 
     @is_exist
