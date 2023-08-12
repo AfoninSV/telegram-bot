@@ -69,13 +69,13 @@ Have a blast cooking up a storm!
 help_message = """
 Here are the core commands:
 
+- /search: Find recipes by a specific ingredient or name.
+- /random: Explore fresh recipes with a random suggestion.
+- /favorites: Check out your saved recipes.
 - /low: Search for easy recipes based on ingredient count.
 - /high: Challenge yourself with complex recipes having more ingredients.
 - /custom: Set a range of ingredients, and I will find recipes within that range.
-- /random: Explore fresh recipes with a random suggestion.
-- /search: Find recipes by a specific ingredient or name.
 - /list: Get a list of categories, areas, or ingredients.
-- /favorites: Check out your saved recipes.
 - /history: Review your last ten queries.
 - /cancel: Stop ongoing operations (or just use another command).
 

@@ -2,14 +2,15 @@ from telebot.types import BotCommand
 
 
 DEFAULT_COMMANDS = (
-    ("/start", "Welcome"),
     ("/help", "Options"),
+    ("/search", "Search by ingredient or name"),
+    ("/random", "Random meal suggestion"),
     ("/favorites", "Favorite meals"),
     ("/low", "Low ingredients"),
     ("/high", "Complex recipes"),
     ("/custom", "Specific ingredient range"),
-    ("/random", "Random meal suggestion"),
-    ("/search", "Search by ingredient or name"),
+
+
     ("/list", "Categories, areas, or ingredients"),
     ("/history", "Last ten queries"),
     ("/cancel", "Cancel operation"),
