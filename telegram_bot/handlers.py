@@ -1,11 +1,9 @@
 from telebot.types import Message
 
-import json
-
 from . import commands
 from .states import ConversationStates, get_user_state, set_user_state
 from utils.helpers import start_message, help_message, get_last_n_from_history
-from database.core import history_interface, favorites_interface
+from database.core import db_interface, history_interface
 from loader import bot
 
 
@@ -42,7 +40,12 @@ def cancel(message: Message) -> None:
 def send_start(message: Message) -> None:
     """Sends welcoming message"""
 
-    history_interface.insert(user_id=message.from_user.id, message="/start")
+    # Write called command to history db
+    history_interface.insert("History", user_id=message.from_user.id, message="/start")
+    # Add user id to user db
+    if not db_interface.read_by("User", "user_id", message.from_user.id):
+        db_interface.insert("User", user_id=message.from_user.id)
+
     bot.send_message(message.chat.id, start_message)
     commands.set_user_state(message, ConversationStates.cancel)
 
@@ -50,7 +53,7 @@ def send_start(message: Message) -> None:
 @bot.message_handler(commands=["help"])
 def send_start(message: Message) -> None:
     """Send message with commands and instructions"""
-    history_interface.insert(user_id=message.from_user.id, message="/help")
+    history_interface.insert("History", user_id=message.from_user.id, message="/help")
     bot.send_message(message.chat.id, help_message)
     commands.set_user_state(message, ConversationStates.cancel)
 
@@ -59,37 +62,37 @@ def send_start(message: Message) -> None:
 def low_high_start(message: Message) -> None:
     # write called command to db
     if message.text == "/low":
-        history_interface.insert(user_id=message.from_user.id, message="/low")
+        history_interface.insert("History", user_id=message.from_user.id, message="/low")
     elif message.text == "/high":
-        history_interface.insert(user_id=message.from_user.id, message="/high")
+        history_interface.insert("History", user_id=message.from_user.id, message="/high")
 
     commands.ask_category(message)
 
 
 @bot.message_handler(commands=["custom"])
 def custom(message: Message):
-    history_interface.insert(user_id=message.from_user.id, message="/custom")
+    history_interface.insert("History", user_id=message.from_user.id, message="/custom")
     ask_string = "Please write the range of ingredient quantities:\n\nFormat: 'number, number' or 'single number'"
     commands.ask_for(message, ask_string, state=ConversationStates.wait_range)
 
 
 @bot.message_handler(commands=["random"])
 def random(message: Message) -> None:
-    history_interface.insert(user_id=message.from_user.id, message="/random")
+    history_interface.insert("History", user_id=message.from_user.id, message="/random")
     commands.set_user_state(message, ConversationStates.wait_random)
     commands.random_recipe(message)
 
 
 @bot.message_handler(commands=["list"])
 def list_start(message: Message) -> None:
-    history_interface.insert(user_id=message.from_user.id, message="/list")
+    history_interface.insert("History", user_id=message.from_user.id, message="/list")
     commands.set_user_state(message, ConversationStates.list_reply)
     commands.ask_for_list(message)
 
 
 @bot.message_handler(commands=["search"])
 def search_start(message: Message) -> None:
-    history_interface.insert(user_id=message.from_user.id, message="/search")
+    history_interface.insert("History", user_id=message.from_user.id, message="/search")
     commands.set_user_state(message, ConversationStates.wait_button)
     reply_data = ["by name", "by ingredients"]
     commands.reply_markup(
@@ -102,7 +105,7 @@ def search_start(message: Message) -> None:
 
 @bot.message_handler(commands=["favorites"])
 def list_start(message: Message) -> None:
-    history_interface.insert(user_id=message.from_user.id, message="/favorites")
+    history_interface.insert("History", user_id=message.from_user.id, message="/favorites")
     commands.show_favorites(message)
 
 
@@ -115,7 +118,7 @@ def history(message: Message) -> None:
         bot.send_message(message.chat.id, reply_str)
     else:
         bot.send_message(message.chat.id, "History is empty, welcome on board!")
-    history_interface.insert(user_id=message.from_user.id, message="/history")
+    history_interface.insert("History", user_id=message.from_user.id, message="/history")
 
 
 # state handlers
@@ -181,15 +184,15 @@ def button(call) -> None:
             commands.reply_categories(msg, call.data)
 
     elif "add" in call.data:
-        data: str = call.data.split("|")[1]
-        commands.add_favorites(msg, data)
+        meal_id: str = call.data.split("|")[1]
+        commands.add_favorites(msg, meal_id)
 
     elif "delete" in call.data:
         meal_id: str = call.data.split("|")[1]
         commands.delete_favorite(msg, meal_id)
 
     elif call.data in commands.CATEGORIES:
-        last_command = get_last_n_from_history(1, msg.from_user.id)[0][1]
+        last_command = get_last_n_from_history(1, msg.from_user.id)[0]
 
         if last_command == "/low":
             commands.low_reply(call)
