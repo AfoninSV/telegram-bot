@@ -26,26 +26,26 @@ def my_zip(list_ingr, list_measr) -> list[tuple]:
     return result_list
 
 
-def history_clean(user_id):
+def history_clean(user_id) -> None:
     """Deletes rows of History table if there are more than 20 for asked user id"""
 
     db = history_interface
-    values = db.read_all()
+    values = db.read_all("History")
     sorted_values = [row for row in values if row.user_id == user_id]
 
     if len(sorted_values) > 20:
         records_to_delete = sorted_values[:-20]
         for record in records_to_delete:
-            db.delete(record.id_key)
+            db.delete("History", record.id)
 
 
 def get_last_n_from_history(n: int, user_id: int) -> list[tuple] | None:
     n = n + 1
     db = history_interface
-    values = db.read_all()
+    values = db.read_all("History")
 
     sorted_values = [
-        (row.date_time, row.message) for row in values if row.user_id == user_id
+        row.message for row in values if row.user_id == user_id
     ]
     history_clean(user_id)
 
