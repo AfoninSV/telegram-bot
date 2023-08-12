@@ -35,8 +35,8 @@ class Favorites(BaseModel):
     Stores user - meal relations as 'favorites'
     """
 
-    user = pw.ForeignKeyField(User, backref="favorites")
-    meal = pw.ForeignKeyField(Meal, backref="favorites")
+    user = pw.ForeignKeyField(User, backref="favorites", field="user_id")
+    meal = pw.ForeignKeyField(Meal, backref="favorites", field="meal_id")
 
 
 class History(pw.Model):
