@@ -26,25 +26,27 @@ def my_zip(list_ingr, list_measr) -> list[tuple]:
     return result_list
 
 
-def history_clean(user_id):
+def history_clean(user_id) -> None:
     """Deletes rows of History table if there are more than 20 for asked user id"""
 
     db = history_interface
-    values = db.read_all()
+    values = db.read_all("History")
     sorted_values = [row for row in values if row.user_id == user_id]
-    
+
     if len(sorted_values) > 20:
         records_to_delete = sorted_values[:-20]
         for record in records_to_delete:
-            db.delete(record.id_key)
+            db.delete("History", record.id)
 
 
 def get_last_n_from_history(n: int, user_id: int) -> list[tuple] | None:
     n = n + 1
     db = history_interface
-    values = db.read_all()
-    
-    sorted_values = [(row.date_time, row.message) for row in values if row.user_id == user_id]
+    values = db.read_all("History")
+
+    sorted_values = [
+        row.message for row in values if row.user_id == user_id
+    ]
     history_clean(user_id)
 
     if sorted_values:
@@ -55,24 +57,27 @@ def get_last_n_from_history(n: int, user_id: int) -> list[tuple] | None:
 
 
 start_message = """
-Welcome to the Telegram Recipe Bot!
+Hey hey, welcome to the Telegram Recipe Bot!
 
-Our bot helps you discover various cooking recipes. 
-Whether you want something simple or more challenging, we've got you covered.
+I'm here to assist you in discovering cooking recipes, whether you're after simple dishes or a culinary journey – I'm here for you. 
+Just type /help to see the available options and what they're all about.
 
-Happy cooking!
+Have a blast cooking up a storm!
 """
 
 
 help_message = """
-Here are the core commands our bot supports:
+Here are the core commands:
 
-- /low: Find easy recipes based on the number of ingredients. Specify a dish type (e.g., "dessert" or "main course") to get simple recipes in that category.
-- /high: Get complex recipes with more ingredients. Test your skills with these challenging dishes.
-- /custom: Specify a range of ingredients, and the bot will find recipes within that range.
-- /random: Discover new recipes with a random suggestion.
-- /search: Find recipes that include a specific ingredient or by name.
-- /list: Get a list of all categories, areas, or ingredients.
-- /history: See your last ten queries.
-- /cancel: Cancel actual operation (or just use another command).
+- /search: Find recipes by a specific ingredient or name.
+- /random: Explore fresh recipes with a random suggestion.
+- /favorites: Check out your saved recipes.
+- /low: Search for easy recipes based on ingredient count.
+- /high: Challenge yourself with complex recipes having more ingredients.
+- /custom: Set a range of ingredients, and I will find recipes within that range.
+- /list: Get a list of categories, areas, or ingredients.
+- /history: Review your last ten queries.
+- /cancel: Stop ongoing operations (or just use another command).
+
+Feel free to give these commands a try and have fun in your cooking adventures! 
 """

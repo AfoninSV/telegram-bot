@@ -6,8 +6,9 @@ from utils.bot_commands import set_commands
 
 
 storage = StateMemoryStorage()
+token = api_settings.tg_token.get_secret_value()
 
-# Initialisation bot app
-bot = telebot.TeleBot(api_settings.tg_token.get_secret_value(),
-                      state_storage=storage)
+# Initialisations
+bot = telebot.TeleBot(token, state_storage=storage)
+
 set_commands(bot)
