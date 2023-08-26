@@ -5,7 +5,13 @@ Our Telegram bot utilizes TheMealDB API to provide users with a variety of cooki
 
 ## Command Functionality
 
-Here are the core commands that our bot supports:
+Here are all commands that our bot supports:
+
+- **`/search`**: Users can input a key ingredient they have on hand or definite meal to find, and the bot will return recipes that include that ingredient.
+
+- **`/random`**: Returns a random recipe. This can be a fun way for users to discover new recipes they might not have tried otherwise.
+
+- **`/favorites`**: Shows saved recipes.
 
 - **`/low`**: Fetches the simplest recipes based on the number of ingredients. Users can specify a type of dish (like "dessert" or "main course"), and the bot will return the simplest recipes within that category.
 
@@ -13,15 +19,12 @@ Here are the core commands that our bot supports:
 
 - **`/custom`**: Users can specify a range for the number of ingredients, and the bot would return recipes that fall within that range.
 
+- **`/list`**: Returns a list of all Categories, Area, Ingredients
+
 - **`/history`**: Retrieves the last ten queries a user made.
 
-In addition to these, we have some additional commands to enhance the user experience:
+- **`/cancel`**: Stops ongoing operations (or just use another command).
 
-- **`/random`**: Returns a random recipe. This can be a fun way for users to discover new recipes they might not have tried otherwise.
-
-- **`/search`**: Users can input a key ingredient they have on hand or definite meal to find, and the bot will return recipes that include that ingredient.
-
-- **`/list`**: Returns a list of all Categories, Area, Ingredients
 
 ## Getting Started
 
