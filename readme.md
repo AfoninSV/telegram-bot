@@ -1,5 +1,5 @@
 # Telegram Recipe Bot
-[Check on me](https://t.me/tasty_explorer_bot)
+[Telegram username: @tasty_explorer_bot](https://t.me/tasty_explorer_bot)
 
 Our Telegram bot utilizes TheMealDB API to provide users with a variety of cooking recipes. The bot can find recipes based on complexity, present random recipes, search for recipes with a specific ingredient, and much more.
 
